@@ -11,8 +11,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - run: npm install
-      - run: npx puppeteer browsers install chrome
       - name: Check court availability
         env:
           EGP_EMAIL: ${{ secrets.EGP_EMAIL }}
@@ -20,5 +18,5 @@ jobs:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
           TARGET_DATE: ${{ vars.TARGET_DATE }}
-        SCRIPT_CODE: ${{ secrets.SCRIPT_CODE }}
+          SCRIPT_CODE: ${{ secrets.SCRIPT_CODE }}
         run: node check-courts.js
