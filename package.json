@@ -1,0 +1,14 @@
+{
+  "name": "egp-court-monitor",
+  "version": "1.0.0",
+  "main": "check-courts.js",
+  "scripts": {
+    "start": "node check-courts.js"
+  },
+  "dependencies": {
+    "puppeteer": "^22.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
