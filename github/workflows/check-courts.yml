@@ -1,29 +1,18 @@
 name: Check EGP Private Courts
-
 on:
   schedule:
     - cron: '0,10,20,30,40,50 7-22 * * *'
   workflow_dispatch:
-
 jobs:
   check-courts:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Install Chromium
-        run: npx puppeteer browsers install chrome
-
+      - run: npm install
+      - run: npx puppeteer browsers install chrome
       - name: Check court availability
         env:
           EGP_EMAIL: ${{ secrets.EGP_EMAIL }}
