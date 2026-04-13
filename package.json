@@ -1,7 +1,7 @@
+
 {
   "name": "egp-court-monitor",
   "version": "1.0.0",
-  "description": "East Grinstead Padel private court availability monitor",
   "main": "check-courts.js",
   "scripts": {
     "start": "node check-courts.js"
