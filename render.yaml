@@ -1,0 +1,7 @@
+services:
+  - type: worker
+    name: egp-court-monitor
+    runtime: node
+    buildCommand: npm install
+    startCommand: node check-courts.js
+    plan: free
