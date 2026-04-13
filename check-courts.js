@@ -1,11 +1,11 @@
 // East Grinstead Padel - Private Court Monitor
-// Uses the MatchPoint mobile API directly - no browser needed!
+// Uses the MatchPoint mobile API directly - no browser 
 
-const EMAIL        = process.env.EGP_EMAIL    || “”;
-const PASSWORD     = process.env.EGP_PASSWORD || “”;
-const TG_BOT_TOKEN = process.env.TG_BOT_TOKEN || “”;
-const TG_CHAT_ID   = process.env.TG_CHAT_ID   || “”;
-const TARGET_DATE  = process.env.TARGET_DATE  || “”;
+const EMAIL        = process.env.EGP_EMAIL;
+const PASSWORD     = process.env.EGP_PASSWORD;
+const TG_BOT_TOKEN = process.env.TG_BOT_TOKEN;
+const TG_CHAT_ID   = process.env.TG_CHAT_ID;
+const TARGET_DATE  = process.env.TARGET_DATE;
 
 const BASE        = “https://eastgrinsteadpadel-gb.matchpoint.com.es”;
 const API         = BASE + “/services/mobi/appservices/v1”;
