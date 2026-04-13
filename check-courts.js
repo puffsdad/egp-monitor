@@ -25,7 +25,7 @@ async function sendTelegram(message) {
     const res = await fetch("https://api.telegram.org/bot" + TG_BOT_TOKEN + "/sendMessage", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: TG_CHAT_ID, text: message, parse_mode: "HTML" }),
+      body: JSON.stringify({ chat_id: TG_CHAT_ID, text: message }),
     });
     const json = await res.json();
     if (json.ok) log("Telegram notification sent.");
@@ -52,75 +52,34 @@ async function main() {
     await page.goto(LOGIN_URL, { waitUntil: "networkidle2", timeout: 60000 });
     await new Promise(r => setTimeout(r, 3000));
 
-    try { await page.click("#CookiesPolicyOK", { timeout: 1000 }); } catch (_) {}
+    try { await page.click("#ButtonPermitirNecesarios", { timeout: 2000 }); log("Dismissed cookie banner."); } catch (_) {}
+    await new Promise(r => setTimeout(r, 1000));
 
-    const title = await page.title();
-    log("Page title: " + title);
+    const userSel = "#ContentPlaceHolderContenido_Login1_UserName";
+    const passSel = "#ContentPlaceHolderContenido_Login1_Password";
+    const btnSel  = "#ContentPlaceHolderContenido_Login1_LoginButton";
 
-    const inputs = await page.evaluate(function() {
-      return Array.from(document.querySelectorAll("input")).map(function(i) {
-        return { type: i.type, id: i.id, name: i.name, placeholder: i.placeholder };
-      });
-    });
-    log("Inputs found: " + JSON.stringify(inputs));
+    await page.waitForSelector(userSel, { timeout: 10000 });
+    await page.click(userSel);
+    await page.type(userSel, EMAIL, { delay: 50 });
+    log("Filled username.");
 
-    var emailSel = null;
-    var emailOptions = [
-      "#ctl00_MainContent_txtEmail",
-      "#txtEmail",
-      "input[type=email]",
-      "input[name=email]",
-    ];
-    for (var i = 0; i < emailOptions.length; i++) {
-      try {
-        await page.waitForSelector(emailOptions[i], { timeout: 2000 });
-        emailSel = emailOptions[i];
-        break;
-      } catch (_) {}
-    }
-
-    if (!emailSel) throw new Error("Could not find email field");
-    await page.click(emailSel);
-    await page.type(emailSel, EMAIL, { delay: 40 });
-    log("Filled email using: " + emailSel);
-
-    var passSel = null;
-    var passOptions = [
-      "#ctl00_MainContent_txtPassword",
-      "#txtPassword",
-      "input[type=password]",
-    ];
-    for (var j = 0; j < passOptions.length; j++) {
-      try {
-        await page.waitForSelector(passOptions[j], { timeout: 2000 });
-        passSel = passOptions[j];
-        break;
-      } catch (_) {}
-    }
-
-    if (!passSel) throw new Error("Could not find password field");
     await page.click(passSel);
-    await page.type(passSel, PASSWORD, { delay: 40 });
-    log("Filled password using: " + passSel);
+    await page.type(passSel, PASSWORD, { delay: 50 });
+    log("Filled password.");
 
-    var submitOptions = [
-      "#ctl00_MainContent_btnLogin",
-      "input[type=submit]",
-      "button[type=submit]",
-    ];
-    for (var k = 0; k < submitOptions.length; k++) {
-      try {
-        await Promise.all([
-          page.waitForNavigation({ waitUntil: "networkidle2", timeout: 40000 }),
-          page.click(submitOptions[k]),
-        ]);
-        log("Submitted using: " + submitOptions[k]);
-        break;
-      } catch (_) {}
-    }
+    await new Promise(r => setTimeout(r, 2000));
 
-    if (page.url().includes("Login.aspx")) {
-      throw new Error("Still on login page - credentials may be wrong");
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: "networkidle2", timeout: 40000 }),
+      page.click(btnSel),
+    ]);
+
+    const urlAfter = page.url();
+    log("After login URL: " + urlAfter);
+
+    if (urlAfter.includes("Login.aspx")) {
+      throw new Error("Still on login page - credentials may be wrong or Cloudflare is blocking");
     }
     log("Logged in successfully.");
 
