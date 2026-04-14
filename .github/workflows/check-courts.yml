@@ -19,4 +19,5 @@ jobs:
           TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
           TARGET_DATE: ${{ vars.TARGET_DATE }}
           SCRIPT_CODE: ${{ secrets.SCRIPT_CODE }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: node check-courts.js
