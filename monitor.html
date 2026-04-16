@@ -10,320 +10,421 @@
 <title>Padel Court Monitor</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--green:#00e676;--green-dim:#00c853;--red:#ff5252;--bg:#0a0f0a;--surface:#111811;--surface2:#1a211a;--border:#2a352a;--text:#e8f5e8;--text-dim:#7a8f7a;}
+:root{--green:#00e676;--red:#ff5252;--bg:#0a0f0a;--surface:#111811;--surface2:#1a211a;--border:#2a352a;--text:#e8f5e8;--text-dim:#7a8f7a;}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:env(safe-area-inset-bottom);}
 body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 20%,rgba(0,230,118,0.06) 0%,transparent 60%);pointer-events:none;z-index:0;}
 .app{position:relative;z-index:1;max-width:430px;margin:0 auto;}
-header{padding:60px 20px 24px;padding-top:calc(60px + env(safe-area-inset-top));}
-.header-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;}
-h1{font-family:'Bebas Neue',sans-serif;font-size:48px;line-height:1;letter-spacing:2px;color:var(--green);text-shadow:0 0 40px rgba(0,230,118,0.3);}
-.live-badge{background:var(--green);color:#000;font-size:10px;font-weight:600;letter-spacing:1px;padding:4px 8px;border-radius:20px;margin-top:8px;display:flex;align-items:center;gap:4px;}
+.page{display:none;}.page.active{display:block;}
+
+header{padding:60px 20px 24px;padding-top:calc(60px + env(safe-area-inset-top));display:flex;align-items:flex-start;justify-content:space-between;}
+h1{font-family:‘Bebas Neue’,sans-serif;font-size:48px;line-height:1;letter-spacing:2px;color:var(–green);text-shadow:0 0 40px rgba(0,230,118,0.3);}
+.live-badge{background:var(–green);color:#000;font-size:10px;font-weight:600;letter-spacing:1px;padding:4px 8px;border-radius:20px;margin-top:6px;display:inline-flex;align-items:center;gap:4px;}
 .live-dot{width:6px;height:6px;background:#000;border-radius:50%;animation:pulse 1.5s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
-.subtitle{color:var(--text-dim);font-size:13px;font-weight:300;}
-.section{margin:0 16px 16px;background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
-.section-header{padding:14px 16px;border-bottom:1px solid var(--border);font-size:11px;font-weight:600;letter-spacing:1.5px;color:var(--text-dim);text-transform:uppercase;}
+.subtitle{color:var(–text-dim);font-size:13px;margin-top:4px;}
+.icon-btn{width:44px;height:44px;background:var(–surface);border:1px solid var(–border);border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:22px;flex-shrink:0;margin-top:8px;}
+.icon-btn:active{transform:scale(0.95);}
+
+.settings-header{padding:60px 20px 20px;padding-top:calc(60px + env(safe-area-inset-top));display:flex;align-items:center;gap:12px;}
+.settings-title{font-family:‘Bebas Neue’,sans-serif;font-size:32px;letter-spacing:2px;color:var(–text);}
+
+.section{margin:0 16px 16px;background:var(–surface);border:1px solid var(–border);border-radius:16px;overflow:hidden;}
+.section-header{padding:14px 16px;border-bottom:1px solid var(–border);font-size:11px;font-weight:600;letter-spacing:1.5px;color:var(–text-dim);text-transform:uppercase;}
 .section-body{padding:16px;}
-.field{margin-bottom:12px;}
-.field:last-child{margin-bottom:0;}
-.field label{display:block;font-size:11px;font-weight:500;color:var(--text-dim);letter-spacing:0.5px;margin-bottom:6px;text-transform:uppercase;}
-.field input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;transition:border-color 0.2s;-webkit-appearance:none;}
-.field input:focus{border-color:var(--green);}
-.field-hint{font-size:11px;color:var(--text-dim);margin-top:6px;line-height:1.4;}
+.field{margin-bottom:12px;}.field:last-child{margin-bottom:0;}
+.field label{display:block;font-size:11px;font-weight:500;color:var(–text-dim);letter-spacing:0.5px;margin-bottom:6px;text-transform:uppercase;}
+.field input{width:100%;background:var(–surface2);border:1px solid var(–border);border-radius:10px;padding:12px 14px;color:var(–text);font-family:‘DM Sans’,sans-serif;font-size:15px;outline:none;transition:border-color 0.2s;-webkit-appearance:none;}
+.field input:focus{border-color:var(–green);}
+.field-hint{font-size:11px;color:var(–text-dim);margin-top:6px;line-height:1.4;}
+
 .venue-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.venue-card{background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;padding:12px;cursor:pointer;transition:all 0.2s;text-align:left;position:relative;}
-.venue-card.selected{border-color:var(--green);background:rgba(0,230,118,0.08);}
+.venue-card{background:var(–surface2);border:1.5px solid var(–border);border-radius:12px;padding:12px;cursor:pointer;transition:all 0.2s;text-align:left;position:relative;}
+.venue-card.selected{border-color:var(–green);background:rgba(0,230,118,0.08);}
 .venue-card:active{transform:scale(0.97);}
-.venue-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px;line-height:1.3;}
-.venue-location{font-size:11px;color:var(--text-dim);}
-.venue-check{position:absolute;top:8px;right:8px;width:16px;height:16px;background:var(--green);border-radius:50%;display:none;align-items:center;justify-content:center;}
-.venue-card.selected .venue-check{display:flex;}
-.venue-check::after{content:'checkmark';font-size:10px;color:#000;font-weight:700;}
+.venue-name{font-size:13px;font-weight:500;color:var(–text);margin-bottom:2px;line-height:1.3;padding-right:18px;}
+.venue-location{font-size:11px;color:var(–text-dim);}
+.venue-tick{position:absolute;top:8px;right:8px;width:16px;height:16px;background:var(–green);border-radius:50%;display:none;align-items:center;justify-content:center;font-size:9px;color:#000;font-weight:900;}
+.venue-card.selected .venue-tick{display:flex;}
+
+.venue-row{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(–border);}
+.venue-row:last-child{border-bottom:none;}
+.venue-row-info{flex:1;}
+.venue-row-name{font-size:14px;font-weight:500;}
+.venue-row-sub{font-size:11px;color:var(–text-dim);margin-top:2px;}
+.built-tag{font-size:10px;padding:1px 6px;border-radius:8px;background:rgba(0,230,118,0.1);color:var(–green);margin-left:6px;vertical-align:middle;}
+.del-btn{width:30px;height:30px;background:rgba(255,82,82,0.1);border:1px solid rgba(255,82,82,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0;}
+.del-btn:active{opacity:0.7;}
+
 .days-row{display:flex;gap:8px;flex-wrap:wrap;}
-.day-chip{background:var(--surface2);border:1.5px solid var(--border);border-radius:20px;padding:6px 14px;font-size:13px;cursor:pointer;transition:all 0.2s;color:var(--text-dim);}
-.day-chip.selected{border-color:var(--green);color:var(--green);background:rgba(0,230,118,0.08);}
+.day-chip{background:var(–surface2);border:1.5px solid var(–border);border-radius:20px;padding:6px 14px;font-size:13px;cursor:pointer;transition:all 0.2s;color:var(–text-dim);}
+.day-chip.selected{border-color:var(–green);color:var(–green);background:rgba(0,230,118,0.08);}
+
 .btn-row{display:flex;gap:10px;margin:0 16px 16px;}
-.btn{flex:1;padding:16px;border:none;border-radius:14px;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1.5px;cursor:pointer;transition:all 0.2s;}
-.btn-primary{background:var(--green);color:#000;}
-.btn-secondary{background:var(--surface);border:1px solid var(--border);color:var(--text-dim);}
+.btn{flex:1;padding:16px;border:none;border-radius:14px;font-family:‘Bebas Neue’,sans-serif;font-size:18px;letter-spacing:1.5px;cursor:pointer;transition:all 0.2s;}
+.btn-primary{background:var(–green);color:#000;}
+.btn-secondary{background:var(–surface);border:1px solid var(–border);color:var(–text-dim);}
 .btn:active{transform:scale(0.97);}
 .btn:disabled{opacity:0.5;cursor:not-allowed;}
-.btn .spinner{display:none;width:18px;height:18px;border:2px solid rgba(0,0,0,0.3);border-top-color:#000;border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto;}
-.btn.loading .btn-text{display:none;}
-.btn.loading .spinner{display:block;}
+.btn .sp{display:none;width:18px;height:18px;border:2px solid rgba(0,0,0,0.3);border-top-color:#000;border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto;}
+.btn-secondary .sp{border-color:rgba(122,143,122,0.3);border-top-color:var(–text-dim);}
+.btn.loading .bt{display:none;}.btn.loading .sp{display:block;}
 @keyframes spin{to{transform:rotate(360deg)}}
+
 .status-bar{margin:0 16px 12px;background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.3);border-radius:12px;padding:12px 16px;display:none;justify-content:space-between;align-items:center;}
-.status-bar .count{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--green);line-height:1;}
-.status-bar .count-label{font-size:12px;color:var(--text-dim);margin-top:2px;}
-.status-bar .checked-at{font-size:11px;color:var(--text-dim);text-align:right;}
-.error-msg{margin:0 16px 16px;background:rgba(255,82,82,0.1);border:1px solid rgba(255,82,82,0.3);border-radius:12px;padding:14px 16px;font-size:13px;color:var(--red);display:none;}
-.info-msg{margin:0 16px 16px;background:rgba(0,230,118,0.08);border:1px solid rgba(0,230,118,0.2);border-radius:12px;padding:14px 16px;font-size:13px;color:var(--text-dim);display:none;}
+.sc{font-family:‘Bebas Neue’,sans-serif;font-size:28px;color:var(–green);line-height:1;}
+.sl{font-size:12px;color:var(–text-dim);margin-top:2px;}
+.sat{font-size:11px;color:var(–text-dim);text-align:right;}
+.error-msg{margin:0 16px 16px;background:rgba(255,82,82,0.1);border:1px solid rgba(255,82,82,0.3);border-radius:12px;padding:14px 16px;font-size:13px;color:var(–red);display:none;}
+.info-msg{margin:0 16px 16px;background:rgba(0,230,118,0.08);border:1px solid rgba(0,230,118,0.2);border-radius:12px;padding:14px 16px;font-size:13px;color:var(–text-dim);display:none;}
+
 .results{margin:0 16px 16px;}
-.date-divider{font-size:11px;font-weight:600;letter-spacing:1.5px;color:var(--text-dim);text-transform:uppercase;padding:16px 0 8px;display:flex;align-items:center;gap:8px;}
-.date-divider::after{content:'';flex:1;height:1px;background:var(--border);}
-.slot-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;animation:slideIn 0.3s ease;}
+.date-div{font-size:11px;font-weight:600;letter-spacing:1.5px;color:var(–text-dim);text-transform:uppercase;padding:16px 0 8px;display:flex;align-items:center;gap:8px;}
+.date-div::after{content:’’;flex:1;height:1px;background:var(–border);}
+
+.slot-card{background:var(–surface);border:1px solid rgba(0,230,118,0.3);border-radius:12px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all 0.2s;animation:slideIn 0.3s ease;}
+.slot-card:active{transform:scale(0.98);background:rgba(0,230,118,0.05);}
 @keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.slot-card.available{border-color:rgba(0,230,118,0.3);}
-.slot-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-.slot-dot.available{background:var(--green);box-shadow:0 0 8px var(--green);}
+.slot-dot{width:10px;height:10px;border-radius:50%;background:var(–green);box-shadow:0 0 8px var(–green);flex-shrink:0;}
 .slot-info{flex:1;}
 .slot-time{font-size:16px;font-weight:600;}
-.slot-court{font-size:12px;color:var(--text-dim);margin-top:2px;}
-.slot-badge{font-size:11px;font-weight:600;letter-spacing:0.5px;padding:4px 10px;border-radius:20px;background:rgba(0,230,118,0.15);color:var(--green);}
-.empty-msg{text-align:center;padding:40px 20px;color:var(--text-dim);}
+.slot-court{font-size:12px;color:var(–text-dim);margin-top:2px;}
+.book-btn{font-size:12px;font-weight:600;padding:6px 12px;border-radius:20px;background:var(–green);color:#000;white-space:nowrap;}
+
+.empty-msg{text-align:center;padding:40px 20px;color:var(–text-dim);}
 .empty-msg .icon{font-size:48px;margin-bottom:12px;}
-.empty-msg .title{color:var(--text);font-weight:600;font-size:18px;margin-bottom:8px;}
+.empty-msg .title{color:var(–text);font-weight:600;font-size:18px;margin-bottom:8px;}
+
+.add-form{padding:16px;border-top:1px solid var(–border);}
+.add-btn{width:100%;padding:12px;background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.3);border-radius:10px;color:var(–green);font-family:‘DM Sans’,sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
+.add-btn:active{opacity:0.8;}
+.save-btn{display:block;width:calc(100% - 32px);margin:0 16px 32px;padding:16px;background:var(–green);border:none;border-radius:14px;font-family:‘Bebas Neue’,sans-serif;font-size:20px;letter-spacing:2px;color:#000;cursor:pointer;}
+.save-btn:active{transform:scale(0.98);}
 </style>
+
 </head>
 <body>
 <div class="app">
-  <header>
-    <div class="header-top">
-      <h1>PADEL<br>COURTS</h1>
-      <div class="live-badge"><div class="live-dot"></div>LIVE</div>
-    </div>
-    <p class="subtitle">MatchPoint availability monitor</p>
-  </header>
 
-  <div class="section">
-    <div class="section-header">GitHub Settings</div>
-    <div class="section-body">
-      <div class="field">
-        <label>GitHub Token</label>
-        <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off">
-        <p class="field-hint">Personal Access Token with repo scope. Stored on your phone only.</p>
+  <!-- MAIN PAGE -->
+
+  <div class="page active" id="mainPage">
+    <header>
+      <div>
+        <h1>PADEL<br>COURTS</h1>
+        <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+        <p class="subtitle">MatchPoint availability monitor</p>
       </div>
-      <div class="field">
-        <label>GitHub Repo</label>
-        <input type="text" id="ghRepo" placeholder="puffsdad/egp-monitor">
-      </div>
-    </div>
-  </div>
+      <div class="icon-btn" onclick="showSettings()">&#9881;</div>
+    </header>
 
-  <div class="section">
-    <div class="section-header">Select Venue</div>
-    <div class="section-body">
-      <div class="venue-grid" id="venueGrid"></div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-header">Days Ahead</div>
-    <div class="section-body">
-      <div class="days-row" id="daysRow">
-        <div class="day-chip" data-days="1">Today</div>
-        <div class="day-chip" data-days="3">3 days</div>
-        <div class="day-chip selected" data-days="7">7 days</div>
-        <div class="day-chip" data-days="10">10 days</div>
-        <div class="day-chip" data-days="14">14 days</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="btn-row">
-    <button class="btn btn-primary" id="readBtn" onclick="readResults()">
-      <span class="btn-text">SHOW RESULTS</span>
-      <div class="spinner"></div>
-    </button>
-    <button class="btn btn-secondary" id="refreshBtn" onclick="triggerRefresh()">
-      <span class="btn-text">REFRESH</span>
-      <div class="spinner" style="border-top-color:var(--text-dim)"></div>
-    </button>
-  </div>
-
-  <div class="error-msg" id="errorMsg"></div>
-  <div class="info-msg" id="infoMsg"></div>
-
-  <div class="status-bar" id="statusBar">
-    <div>
-      <div class="count" id="availCount">0</div>
-      <div class="count-label">available slots</div>
-    </div>
-    <div class="checked-at" id="checkedAt"></div>
-  </div>
-
-  <div class="results" id="results"></div>
+```
+<div class="section">
+  <div class="section-header">Select Venue</div>
+  <div class="section-body"><div class="venue-grid" id="venueGrid"></div></div>
 </div>
 
+<div class="section">
+  <div class="section-header">Days Ahead</div>
+  <div class="section-body">
+    <div class="days-row" id="daysRow">
+      <div class="day-chip" data-days="1">Today</div>
+      <div class="day-chip" data-days="3">3 days</div>
+      <div class="day-chip selected" data-days="7">7 days</div>
+      <div class="day-chip" data-days="10">10 days</div>
+      <div class="day-chip" data-days="14">14 days</div>
+    </div>
+  </div>
+</div>
+
+<div class="btn-row">
+  <button class="btn btn-primary" id="readBtn" onclick="readResults()">
+    <span class="bt">SHOW RESULTS</span><div class="sp"></div>
+  </button>
+  <button class="btn btn-secondary" id="refreshBtn" onclick="triggerRefresh()">
+    <span class="bt">REFRESH</span><div class="sp"></div>
+  </button>
+</div>
+
+<div class="error-msg" id="errorMsg"></div>
+<div class="info-msg" id="infoMsg"></div>
+
+<div class="status-bar" id="statusBar">
+  <div><div class="sc" id="availCount">0</div><div class="sl">available slots</div></div>
+  <div class="sat" id="checkedAt"></div>
+</div>
+
+<div class="results" id="results"></div>
+```
+
+  </div>
+
+  <!-- SETTINGS PAGE -->
+
+  <div class="page" id="settingsPage">
+    <div class="settings-header">
+      <div class="icon-btn" onclick="saveSettings()">&#8592;</div>
+      <div class="settings-title">SETTINGS</div>
+    </div>
+
+```
+<div class="section">
+  <div class="section-header">GitHub</div>
+  <div class="section-body">
+    <div class="field">
+      <label>GitHub Token</label>
+      <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off">
+      <p class="field-hint">Personal Access Token with repo scope. Stored on your phone only.</p>
+    </div>
+    <div class="field">
+      <label>GitHub Repo</label>
+      <input type="text" id="ghRepo" placeholder="puffsdad/egp-monitor">
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-header">Venues</div>
+  <div id="venueList"></div>
+  <div class="add-form">
+    <div class="field"><label>Venue Name</label><input type="text" id="newName" placeholder="My Padel Club"></div>
+    <div class="field"><label>Location</label><input type="text" id="newLoc" placeholder="London"></div>
+    <div class="field">
+      <label>Subdomain</label>
+      <input type="text" id="newSub" placeholder="mypadelclub-gb">
+      <p class="field-hint">The part before .matchpoint.com.es in the booking URL</p>
+    </div>
+    <button class="add-btn" onclick="addVenue()">+ Add Venue</button>
+  </div>
+</div>
+
+<button class="save-btn" onclick="saveSettings()">SAVE & GO BACK</button>
+```
+
+  </div>
+
+</div>
 <script>
-const VENUES = [
-  {name:"East Grinstead Padel",location:"East Grinstead",id:"eastgrinsteadpadel"},
-  {name:"Bromley Sports Club",location:"Bromley, London",id:"bromleysportsclub"},
-  {name:"Frindsbury Tennis & Padel",location:"Rochester, Kent",id:"frindsburytennisandpadelclub"},
-  {name:"Stratford Padel Club",location:"London E15",id:"stratfordpadelclub"},
-  {name:"UK Padel",location:"Holmer Green, Bucks",id:"ukpadel"},
+var BUILTIN = [
+  {name:"East Grinstead Padel",location:"East Grinstead",subdomain:"eastgrinsteadpadel-gb",builtin:true},
+  {name:"Bromley Sports Club",location:"Bromley, London",subdomain:"bromleysportsclub-gb",builtin:true},
+  {name:"Frindsbury Tennis & Padel",location:"Rochester, Kent",subdomain:"frindsburytennisandpadelclub-gb",builtin:true},
+  {name:"Stratford Padel Club",location:"London E15",subdomain:"stratfordpadelclub",builtin:true},
+  {name:"UK Padel",location:"Holmer Green, Bucks",subdomain:"ukpadel-gb",builtin:true}
 ];
 
-let selectedVenue = VENUES[0];
-let selectedDays = 7;
+var venues = [];
+var selectedVenue = null;
+var selectedDays = 7;
 
-function initVenues() {
-  const grid = document.getElementById("venueGrid");
-  VENUES.forEach((v, i) => {
-    const card = document.createElement("div");
-    card.className = "venue-card" + (i===0?" selected":"");
-    card.innerHTML = '<div class="venue-check"></div><div class="venue-name">'+v.name+'</div><div class="venue-location">'+v.location+'</div>';
-    card.onclick = function() {
-      document.querySelectorAll(".venue-card").forEach(function(c){c.classList.remove("selected");});
-      card.classList.add("selected");
-      selectedVenue = v;
-    };
-    grid.appendChild(card);
-  });
+function loadVenues() {
+var custom = [];
+try { custom = JSON.parse(localStorage.getItem(“custom_venues”) || “[]”); } catch(e) {}
+venues = BUILTIN.concat(custom);
+if (!selectedVenue) selectedVenue = venues[0];
 }
 
-document.getElementById("daysRow").addEventListener("click", function(e) {
-  const chip = e.target.closest(".day-chip");
-  if (!chip) return;
-  document.querySelectorAll(".day-chip").forEach(function(c){c.classList.remove("selected");});
-  chip.classList.add("selected");
-  selectedDays = parseInt(chip.dataset.days);
+function saveCustomVenues() {
+var custom = venues.filter(function(v){ return !v.builtin; });
+localStorage.setItem(“custom_venues”, JSON.stringify(custom));
+}
+
+function getToken(){ return document.getElementById(“ghToken”).value.trim(); }
+function getRepo(){ return document.getElementById(“ghRepo”).value.trim() || “puffsdad/egp-monitor”; }
+
+function showMain() {
+document.getElementById(“mainPage”).classList.add(“active”);
+document.getElementById(“settingsPage”).classList.remove(“active”);
+renderVenueGrid();
+}
+
+function showSettings() {
+document.getElementById(“settingsPage”).classList.add(“active”);
+document.getElementById(“mainPage”).classList.remove(“active”);
+renderVenueList();
+}
+
+function saveSettings() {
+localStorage.setItem(“padel_ghToken”, document.getElementById(“ghToken”).value);
+localStorage.setItem(“padel_ghRepo”, document.getElementById(“ghRepo”).value);
+showMain();
+}
+
+function renderVenueGrid() {
+var grid = document.getElementById(“venueGrid”);
+grid.innerHTML = “”;
+venues.forEach(function(v, i) {
+var card = document.createElement(“div”);
+card.className = “venue-card” + (v === selectedVenue ? “ selected” : “”);
+card.innerHTML = ‘<div class="venue-tick">✓</div><div class="venue-name">’+v.name+’</div><div class="venue-location">’+v.location+’</div>’;
+card.onclick = function() {
+selectedVenue = v;
+renderVenueGrid();
+};
+grid.appendChild(card);
+});
+}
+
+function renderVenueList() {
+var list = document.getElementById(“venueList”);
+list.innerHTML = “”;
+venues.forEach(function(v, i) {
+var row = document.createElement(“div”);
+row.className = “venue-row”;
+var delBtn = v.builtin ? “” : ‘<div class="del-btn" onclick="deleteVenue('+i+')">×</div>’;
+var tag = v.builtin ? ‘<span class="built-tag">built-in</span>’ : ‘’;
+row.innerHTML = ‘<div class="venue-row-info"><div class="venue-row-name">’+v.name+tag+’</div><div class="venue-row-sub">’+v.subdomain+’.matchpoint.com.es</div></div>’+delBtn;
+list.appendChild(row);
+});
+}
+
+function deleteVenue(i) {
+if (venues[i].builtin) return;
+if (selectedVenue === venues[i]) selectedVenue = venues[0];
+venues.splice(i, 1);
+saveCustomVenues();
+renderVenueList();
+}
+
+function addVenue() {
+var name = document.getElementById(“newName”).value.trim();
+var loc = document.getElementById(“newLoc”).value.trim();
+var sub = document.getElementById(“newSub”).value.trim();
+if (!name || !sub) { alert(“Please fill in venue name and subdomain.”); return; }
+venues.push({name:name, location:loc||””, subdomain:sub, builtin:false});
+saveCustomVenues();
+document.getElementById(“newName”).value = “”;
+document.getElementById(“newLoc”).value = “”;
+document.getElementById(“newSub”).value = “”;
+renderVenueList();
+}
+
+document.getElementById(“daysRow”).addEventListener(“click”, function(e) {
+var chip = e.target.closest(”.day-chip”);
+if (!chip) return;
+document.querySelectorAll(”.day-chip”).forEach(function(c){ c.classList.remove(“selected”); });
+chip.classList.add(“selected”);
+selectedDays = parseInt(chip.dataset.days);
 });
 
-function getToken() { return document.getElementById("ghToken").value.trim(); }
-function getRepo() { return document.getElementById("ghRepo").value.trim() || "puffsdad/egp-monitor"; }
+function showErr(msg){ var e=document.getElementById(“errorMsg”); e.textContent=msg; e.style.display=“block”; }
+function hideErr(){ document.getElementById(“errorMsg”).style.display=“none”; }
+function showInfo(msg){ var e=document.getElementById(“infoMsg”); e.textContent=msg; e.style.display=“block”; }
+function hideInfo(){ document.getElementById(“infoMsg”).style.display=“none”; }
 
-function showError(msg) { const e=document.getElementById("errorMsg"); e.textContent=msg; e.style.display="block"; }
-function hideError() { document.getElementById("errorMsg").style.display="none"; }
-function showInfo(msg) { const e=document.getElementById("infoMsg"); e.textContent=msg; e.style.display="block"; }
-function hideInfo() { document.getElementById("infoMsg").style.display="none"; }
-
-function pad(n) { return String(n).padStart(2,"0"); }
+function pad(n){ return String(n).padStart(2,“0”); }
 
 function formatDate(ddmmyyyy) {
-  const parts = ddmmyyyy.split("/");
-  const d = parts[0], m = parts[1], y = parts[2];
-  const date = new Date(y, m-1, d);
-  const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  const today = new Date();
-  const tomorrow = new Date(); tomorrow.setDate(today.getDate()+1);
-  if (date.toDateString()===today.toDateString()) return "TODAY";
-  if (date.toDateString()===tomorrow.toDateString()) return "TOMORROW";
-  return days[date.getDay()]+" "+d+" "+months[date.getMonth()];
+var p = ddmmyyyy.split(”/”);
+var date = new Date(p[2], p[1]-1, p[0]);
+var days = [“Sunday”,“Monday”,“Tuesday”,“Wednesday”,“Thursday”,“Friday”,“Saturday”];
+var months = [“Jan”,“Feb”,“Mar”,“Apr”,“May”,“Jun”,“Jul”,“Aug”,“Sep”,“Oct”,“Nov”,“Dec”];
+var today = new Date();
+var tomorrow = new Date(); tomorrow.setDate(today.getDate()+1);
+if (date.toDateString()===today.toDateString()) return “TODAY”;
+if (date.toDateString()===tomorrow.toDateString()) return “TOMORROW”;
+return days[date.getDay()]+” “+p[0]+” “+months[date.getMonth()];
+}
+
+function bookingUrl(fecha) {
+var p = fecha.split(”/”);
+var dateStr = p[2]+”-”+p[1]+”-”+p[0];
+var base = “https://”+selectedVenue.subdomain+”.matchpoint.com.es”;
+return base+”/Bookings/CreateBooking.aspx?date=”+dateStr;
 }
 
 async function readResults() {
-  const token = getToken();
-  const repo = getRepo();
-  if (!token) { showError("Please enter your GitHub token."); return; }
-
-  const btn = document.getElementById("readBtn");
-  btn.classList.add("loading"); btn.disabled = true;
-  hideError(); hideInfo();
-  document.getElementById("results").innerHTML = "";
-  document.getElementById("statusBar").style.display = "none";
-
-  try {
-    const res = await fetch("https://api.github.com/repos/"+repo+"/actions/variables/LAST_RESULT", {
-      headers: {
-        "Authorization": "Bearer "+token,
-        "Accept": "application/vnd.github.v3+json"
-      }
-    });
-
-    if (!res.ok) {
-      throw new Error("Could not read results (status "+res.status+"). Check your token and repo name.");
-    }
-
-    const json = await res.json();
-    const val = json.value || "";
-
-    if (!val || val === "-" || val.length < 3) {
-      showInfo("No results stored yet. Tap REFRESH to trigger a fresh check, then tap SHOW RESULTS after 20 seconds.");
-      return;
-    }
-
-    let data;
-    try { data = JSON.parse(val); } catch(e) {
-      showError("Could not read results. Try tapping REFRESH first.");
-      return;
-    }
-
-    renderResults(data);
-
-  } catch(err) {
-    showError("Error: "+err.message);
-  } finally {
-    btn.classList.remove("loading"); btn.disabled = false;
-  }
+var token = getToken();
+var repo = getRepo();
+if (!token) { showErr(“Please enter your GitHub token in Settings.”); return; }
+var btn = document.getElementById(“readBtn”);
+btn.classList.add(“loading”); btn.disabled = true;
+hideErr(); hideInfo();
+document.getElementById(“results”).innerHTML = “”;
+document.getElementById(“statusBar”).style.display = “none”;
+try {
+var res = await fetch(“https://api.github.com/repos/”+repo+”/actions/variables/LAST_RESULT”, {
+headers: {“Authorization”:“Bearer “+token,“Accept”:“application/vnd.github.v3+json”}
+});
+if (!res.ok) throw new Error(“Could not read results (status “+res.status+”). Check your token in Settings.”);
+var json = await res.json();
+var val = json.value || “”;
+if (!val || val===”-” || val.length<3) {
+showInfo(“No results yet. Tap REFRESH to trigger a fresh check, then SHOW RESULTS after 20 seconds.”);
+return;
+}
+var data;
+try { data = JSON.parse(val); } catch(e) { showErr(“Could not parse results. Try tapping REFRESH first.”); return; }
+renderResults(data);
+} catch(err) {
+showErr(“Error: “+err.message);
+} finally {
+btn.classList.remove(“loading”); btn.disabled = false;
+}
 }
 
 async function triggerRefresh() {
-  const token = getToken();
-  const repo = getRepo();
-  if (!token) { showError("Please enter your GitHub token."); return; }
-
-  const btn = document.getElementById("refreshBtn");
-  btn.classList.add("loading"); btn.disabled = true;
-  hideError(); hideInfo();
-
-  try {
-    const res = await fetch("https://api.github.com/repos/"+repo+"/actions/workflows/check-courts.yml/dispatches", {
-      method: "POST",
-      headers: {
-        "Authorization": "Bearer "+token,
-        "Accept": "application/vnd.github.v3+json",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ref:"main"})
-    });
-
-    if (res.ok || res.status === 204) {
-      showInfo("Refresh triggered! Wait about 20 seconds, then tap SHOW RESULTS.");
-    } else {
-      throw new Error("Failed to trigger refresh (status "+res.status+")");
-    }
-  } catch(err) {
-    showError("Error: "+err.message);
-  } finally {
-    btn.classList.remove("loading"); btn.disabled = false;
-  }
+var token = getToken();
+var repo = getRepo();
+if (!token) { showErr(“Please enter your GitHub token in Settings.”); return; }
+var btn = document.getElementById(“refreshBtn”);
+btn.classList.add(“loading”); btn.disabled = true;
+hideErr(); hideInfo();
+try {
+var res = await fetch(“https://api.github.com/repos/”+repo+”/actions/workflows/check-courts.yml/dispatches”, {
+method:“POST”,
+headers:{“Authorization”:“Bearer “+token,“Accept”:“application/vnd.github.v3+json”,“Content-Type”:“application/json”},
+body:JSON.stringify({ref:“main”})
+});
+if (res.ok || res.status===204) {
+showInfo(“Refresh triggered! Wait about 20 seconds then tap SHOW RESULTS.”);
+} else {
+throw new Error(“Failed (status “+res.status+”)”);
+}
+} catch(err) {
+showErr(“Error: “+err.message);
+} finally {
+btn.classList.remove(“loading”); btn.disabled = false;
+}
 }
 
 function renderResults(data) {
-  const container = document.getElementById("results");
-  container.innerHTML = "";
-
-  let totalAvail = 0;
-  data.forEach(function(d) { totalAvail += (d.slots||[]).length; });
-
-  document.getElementById("statusBar").style.display = "flex";
-  document.getElementById("availCount").textContent = totalAvail;
-  document.getElementById("checkedAt").innerHTML = "Last checked<br>"+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
-
-  if (data.length === 0) {
-    container.innerHTML = '<div class="empty-msg"><div class="icon">😔</div><div class="title">No courts available</div><p>All private courts are booked. Try refreshing!</p></div>';
-    return;
-  }
-
-  data.forEach(function(entry) {
-    const slots = entry.slots || [];
-    if (slots.length === 0) return;
-
-    const divider = document.createElement("div");
-    divider.className = "date-divider";
-    divider.textContent = formatDate(entry.date);
-    container.appendChild(divider);
-
-    slots.forEach(function(slot) {
-      const card = document.createElement("div");
-      card.className = "slot-card available";
-      card.innerHTML = '<div class="slot-dot available"></div><div class="slot-info"><div class="slot-time">'+(slot.time||"")+'</div><div class="slot-court">'+(slot.court||"")+'</div></div><div class="slot-badge">FREE</div>';
-      container.appendChild(card);
-    });
-  });
+var container = document.getElementById(“results”);
+container.innerHTML = “”;
+var totalAvail = 0;
+data.forEach(function(d){ totalAvail += (d.slots||[]).length; });
+document.getElementById(“statusBar”).style.display = “flex”;
+document.getElementById(“availCount”).textContent = totalAvail;
+document.getElementById(“checkedAt”).innerHTML = “Last checked<br>”+new Date().toLocaleTimeString([],{hour:“2-digit”,minute:“2-digit”});
+if (data.length===0 || totalAvail===0) {
+container.innerHTML = ‘<div class="empty-msg"><div class="icon">🙦</div><div class="title">No courts available</div><p>All private courts are booked. Try refreshing!</p></div>’;
+return;
+}
+data.forEach(function(entry) {
+var slots = entry.slots || [];
+if (slots.length===0) return;
+var div = document.createElement(“div”);
+div.className = “date-div”;
+div.textContent = formatDate(entry.date);
+container.appendChild(div);
+slots.forEach(function(slot) {
+var card = document.createElement(“div”);
+card.className = “slot-card”;
+card.innerHTML = ‘<div class="slot-dot"></div><div class="slot-info"><div class="slot-time">’+(slot.time||””)+’</div><div class="slot-court">’+(slot.court||””)+’</div></div><div class="book-btn">BOOK</div>’;
+card.onclick = function() {
+window.open(bookingUrl(entry.date), “_blank”);
+};
+container.appendChild(card);
+});
+});
 }
 
-document.getElementById("ghToken").addEventListener("change", function(e) { localStorage.setItem("padel_ghToken", e.target.value); });
-document.getElementById("ghRepo").addEventListener("change", function(e) { localStorage.setItem("padel_ghRepo", e.target.value); });
-
-window.addEventListener("load", function() {
-  document.getElementById("ghToken").value = localStorage.getItem("padel_ghToken") || "";
-  document.getElementById("ghRepo").value = localStorage.getItem("padel_ghRepo") || "puffsdad/egp-monitor";
-  initVenues();
-  readResults();
+window.addEventListener(“load”, function() {
+loadVenues();
+document.getElementById(“ghToken”).value = localStorage.getItem(“padel_ghToken”) || “”;
+document.getElementById(“ghRepo”).value = localStorage.getItem(“padel_ghRepo”) || “puffsdad/egp-monitor”;
+renderVenueGrid();
+readResults();
 });
 </script>
 
