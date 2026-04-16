@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Padel Courts">
+<title>Padel Court Monitor</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #00e676;
+    --green-dim: #00c853;
+    --red: #ff5252;
+    --bg: #0a0f0a;
+    --surface: #111811;
+    --surface2: #1a211a;
+    --border: #2a352a;
+    --text: #e8f5e8;
+    --text-dim: #7a8f7a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at 20% 20%, rgba(0,230,118,0.06) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .app { position: relative; z-index: 1; max-width: 430px; margin: 0 auto; }
+
+header {
+padding: 60px 20px 24px;
+padding-top: calc(60px + env(safe-area-inset-top));
+}
+.header-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 4px; }
+h1 { font-family: ‘Bebas Neue’, sans-serif; font-size: 48px; line-height: 1; letter-spacing: 2px; color: var(–green); text-shadow: 0 0 40px rgba(0,230,118,0.3); }
+.live-badge { background: var(–green); color: #000; font-size: 10px; font-weight: 600; letter-spacing: 1px; padding: 4px 8px; border-radius: 20px; margin-top: 8px; display: flex; align-items: center; gap: 4px; }
+.live-dot { width: 6px; height: 6px; background: #000; border-radius: 50%; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+.subtitle { color: var(–text-dim); font-size: 13px; font-weight: 300; }
+
+.section { margin: 0 16px 16px; background: var(–surface); border: 1px solid var(–border); border-radius: 16px; overflow: hidden; }
+.section-header { padding: 14px 16px; border-bottom: 1px solid var(–border); font-size: 11px; font-weight: 600; letter-spacing: 1.5px; color: var(–text-dim); text-transform: uppercase; }
+.section-body { padding: 16px; }
+
+.field { margin-bottom: 12px; }
+.field:last-child { margin-bottom: 0; }
+.field label { display: block; font-size: 11px; font-weight: 500; color: var(–text-dim); letter-spacing: 0.5px; margin-bottom: 6px; text-transform: uppercase; }
+.field input { width: 100%; background: var(–surface2); border: 1px solid var(–border); border-radius: 10px; padding: 12px 14px; color: var(–text); font-family: ‘DM Sans’, sans-serif; font-size: 15px; outline: none; transition: border-color 0.2s; -webkit-appearance: none; }
+.field input:focus { border-color: var(–green); }
+.field-hint { font-size: 11px; color: var(–text-dim); margin-top: 6px; line-height: 1.4; }
+
+.venue-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.venue-card { background: var(–surface2); border: 1.5px solid var(–border); border-radius: 12px; padding: 12px; cursor: pointer; transition: all 0.2s; text-align: left; position: relative; }
+.venue-card.selected { border-color: var(–green); background: rgba(0,230,118,0.08); }
+.venue-card:active { transform: scale(0.97); }
+.venue-name { font-size: 13px; font-weight: 500; color: var(–text); margin-bottom: 2px; line-height: 1.3; }
+.venue-location { font-size: 11px; color: var(–text-dim); }
+.venue-check { position: absolute; top: 8px; right: 8px; width: 16px; height: 16px; background: var(–green); border-radius: 50%; display: none; align-items: center; justify-content: center; }
+.venue-card.selected .venue-check { display: flex; }
+.venue-check::after { content: ‘✓’; font-size: 10px; color: #000; font-weight: 700; }
+
+.days-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.day-chip { background: var(–surface2); border: 1.5px solid var(–border); border-radius: 20px; padding: 6px 14px; font-size: 13px; cursor: pointer; transition: all 0.2s; color: var(–text-dim); }
+.day-chip.selected { border-color: var(–green); color: var(–green); background: rgba(0,230,118,0.08); }
+
+.check-btn { display: block; width: calc(100% - 32px); margin: 0 16px 16px; padding: 18px; background: var(–green); border: none; border-radius: 16px; font-family: ‘Bebas Neue’, sans-serif; font-size: 22px; letter-spacing: 2px; color: #000; cursor: pointer; transition: all 0.2s; }
+.check-btn:active { transform: scale(0.98); }
+.check-btn:disabled { background: var(–border); color: var(–text-dim); cursor: not-allowed; }
+.check-btn .spinner { display: none; width: 20px; height: 20px; border: 2px solid rgba(0,0,0,0.3); border-top-color: #000; border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto; }
+.check-btn.loading .btn-text { display: none; }
+.check-btn.loading .spinner { display: block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.status-bar { margin: 0 16px 12px; background: rgba(0,230,118,0.1); border: 1px solid rgba(0,230,118,0.3); border-radius: 12px; padding: 12px 16px; display: none; justify-content: space-between; align-items: center; }
+.status-bar .count { font-family: ‘Bebas Neue’, sans-serif; font-size: 28px; color: var(–green); line-height: 1; }
+.status-bar .count-label { font-size: 12px; color: var(–text-dim); margin-top: 2px; }
+.status-bar .checked-at { font-size: 11px; color: var(–text-dim); text-align: right; }
+
+.error-msg { margin: 0 16px 16px; background: rgba(255,82,82,0.1); border: 1px solid rgba(255,82,82,0.3); border-radius: 12px; padding: 14px 16px; font-size: 13px; color: var(–red); display: none; }
+
+.results { margin: 0 16px 16px; }
+.date-divider { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; color: var(–text-dim); text-transform: uppercase; padding: 16px 0 8px; display: flex; align-items: center; gap: 8px; }
+.date-divider::after { content: ‘’; flex: 1; height: 1px; background: var(–border); }
+
+.slot-card { background: var(–surface); border: 1px solid var(–border); border-radius: 12px; padding: 14px 16px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; animation: slideIn 0.3s ease; }
+@keyframes slideIn { from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)} }
+.slot-card.available { border-color: rgba(0,230,118,0.3); }
+.slot-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.slot-dot.available { background: var(–green); box-shadow: 0 0 8px var(–green); }
+.slot-dot.booked { background: var(–text-dim); }
+.slot-info { flex: 1; }
+.slot-time { font-size: 16px; font-weight: 600; }
+.slot-court { font-size: 12px; color: var(–text-dim); margin-top: 2px; }
+.slot-badge { font-size: 11px; font-weight: 600; letter-spacing: 0.5px; padding: 4px 10px; border-radius: 20px; }
+.slot-badge.available { background: rgba(0,230,118,0.15); color: var(–green); }
+.slot-badge.booked { background: rgba(122,143,122,0.15); color: var(–text-dim); }
+
+.progress-msg { text-align: center; padding: 24px; color: var(–text-dim); font-size: 14px; }
+.progress-msg .prog-icon { font-size: 32px; margin-bottom: 8px; animation: bounce 1s infinite; }
+@keyframes bounce { 0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)} }
+
+.empty-msg { text-align: center; padding: 40px 20px; color: var(–text-dim); }
+.empty-msg .icon { font-size: 48px; margin-bottom: 12px; }
+.empty-msg .title { color: var(–text); font-weight: 600; font-size: 18px; margin-bottom: 8px; }
+
+.toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; margin: 0 16px 12px; background: var(–surface); border: 1px solid var(–border); border-radius: 12px; }
+.toggle-label { font-size: 13px; color: var(–text-dim); }
+.toggle { width: 40px; height: 24px; background: var(–border); border-radius: 12px; position: relative; cursor: pointer; transition: background 0.2s; }
+.toggle.on { background: var(–green); }
+.toggle::after { content: ‘’; position: absolute; width: 18px; height: 18px; background: #fff; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.2s; }
+.toggle.on::after { transform: translateX(16px); }
+</style>
+
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="header-top">
+      <h1>PADEL<br>COURTS</h1>
+      <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+    </div>
+    <p class="subtitle">MatchPoint availability monitor</p>
+  </header>
+
+  <!-- GitHub Token -->
+
+  <div class="section">
+    <div class="section-header">GitHub Settings</div>
+    <div class="section-body">
+      <div class="field">
+        <label>GitHub Token</label>
+        <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off">
+        <p class="field-hint">Your Personal Access Token with repo scope. Saved locally on your phone only.</p>
+      </div>
+      <div class="field">
+        <label>GitHub Repo</label>
+        <input type="text" id="ghRepo" placeholder="puffsdad/egp-monitor">
+        <p class="field-hint">Your GitHub username/repo-name</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Venue -->
+
+  <div class="section">
+    <div class="section-header">Select Venue</div>
+    <div class="section-body">
+      <div class="venue-grid" id="venueGrid"></div>
+    </div>
+  </div>
+
+  <!-- Days -->
+
+  <div class="section">
+    <div class="section-header">Days Ahead</div>
+    <div class="section-body">
+      <div class="days-row" id="daysRow">
+        <div class="day-chip" data-days="1">Today</div>
+        <div class="day-chip" data-days="3">3 days</div>
+        <div class="day-chip selected" data-days="7">7 days</div>
+        <div class="day-chip" data-days="10">10 days</div>
+        <div class="day-chip" data-days="14">14 days</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Check button -->
+
+  <button class="check-btn" id="checkBtn" onclick="checkCourts()">
+    <span class="btn-text">CHECK AVAILABILITY</span>
+    <div class="spinner"></div>
+  </button>
+
+  <!-- Error -->
+
+  <div class="error-msg" id="errorMsg"></div>
+
+  <!-- Status bar -->
+
+  <div class="status-bar" id="statusBar">
+    <div>
+      <div class="count" id="availCount">0</div>
+      <div class="count-label">available slots</div>
+    </div>
+    <div class="checked-at" id="checkedAt"></div>
+  </div>
+
+  <!-- Toggle -->
+
+  <div class="toggle-row" id="toggleRow" style="display:none">
+    <span class="toggle-label">Show booked slots</span>
+    <div class="toggle" id="bookedToggle" onclick="toggleBooked()"></div>
+  </div>
+
+  <!-- Results -->
+
+  <div class="results" id="results"></div>
+</div>
+
+<script>
+const VENUES = [
+  { name: "East Grinstead Padel", location: "East Grinstead", id: "eastgrinsteadpadel" },
+  { name: "Bromley Sports Club", location: "Bromley, London", id: "bromleysportsclub" },
+  { name: "Frindsbury Tennis & Padel", location: "Rochester, Kent", id: "frindsburytennisandpadelclub" },
+  { name: "Stratford Padel Club", location: "London E15", id: "stratfordpadelclub" },
+  { name: "UK Padel", location: "Holmer Green, Bucks", id: "ukpadel" },
+];
+
+let selectedVenue = VENUES[0];
+let selectedDays = 7;
+let showBooked = false;
+let lastData = [];
+
+// Init venues
+function initVenues() {
+  const grid = document.getElementById("venueGrid");
+  VENUES.forEach((v, i) => {
+    const card = document.createElement("div");
+    card.className = "venue-card" + (i === 0 ? " selected" : "");
+    card.innerHTML = `<div class="venue-check"></div><div class="venue-name">${v.name}</div><div class="venue-location">${v.location}</div>`;
+    card.onclick = () => {
+      document.querySelectorAll(".venue-card").forEach(c => c.classList.remove("selected"));
+      card.classList.add("selected");
+      selectedVenue = v;
+    };
+    grid.appendChild(card);
+  });
+}
+
+// Days chips
+document.getElementById("daysRow").addEventListener("click", e => {
+  const chip = e.target.closest(".day-chip");
+  if (!chip) return;
+  document.querySelectorAll(".day-chip").forEach(c => c.classList.remove("selected"));
+  chip.classList.add("selected");
+  selectedDays = parseInt(chip.dataset.days);
+});
+
+function toggleBooked() {
+  showBooked = !showBooked;
+  document.getElementById("bookedToggle").classList.toggle("on", showBooked);
+  renderResults(lastData);
+}
+
+function pad(n) { return String(n).padStart(2, "0"); }
+
+function formatDate(ddmmyyyy) {
+  const [d, m, y] = ddmmyyyy.split("/");
+  const date = new Date(y, m-1, d);
+  const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const today = new Date();
+  const tomorrow = new Date(); tomorrow.setDate(today.getDate()+1);
+  if (date.toDateString() === today.toDateString()) return "TODAY";
+  if (date.toDateString() === tomorrow.toDateString()) return "TOMORROW";
+  return days[date.getDay()] + " " + d + " " + months[date.getMonth()];
+}
+
+async function checkCourts() {
+  const token = document.getElementById("ghToken").value.trim();
+  const repo = document.getElementById("ghRepo").value.trim() || "puffsdad/egp-monitor";
+
+  if (!token) { showError("Please enter your GitHub token."); return; }
+
+  const btn = document.getElementById("checkBtn");
+  btn.classList.add("loading");
+  btn.disabled = true;
+  hideError();
+  document.getElementById("results").innerHTML = "";
+  document.getElementById("statusBar").style.display = "none";
+  document.getElementById("toggleRow").style.display = "none";
+
+  // Show progress
+  document.getElementById("results").innerHTML = `
+    <div class="progress-msg">
+      <div class="prog-icon">🎾</div>
+      <div>Triggering check...</div>
+    </div>`;
+
+  try {
+    // Update the DAYS variable so the gist uses the right number
+    // First trigger the workflow
+    const triggerRes = await fetch("https://api.github.com/repos/" + repo + "/actions/workflows/check-courts.yml/dispatches", {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer " + token,
+        "Accept": "application/vnd.github.v3+json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ ref: "main" })
+    });
+
+    if (!triggerRes.ok && triggerRes.status !== 204) {
+      throw new Error("Failed to trigger workflow (status " + triggerRes.status + "). Check your token.");
+    }
+
+    // Wait for workflow to complete (poll every 3 seconds for up to 60 seconds)
+    document.getElementById("results").innerHTML = `
+      <div class="progress-msg">
+        <div class="prog-icon">⚡</div>
+        <div>Checking courts...<br><small style="font-size:11px;opacity:0.6">This takes about 10-15 seconds</small></div>
+      </div>`;
+
+    await new Promise(r => setTimeout(r, 5000));
+
+    let data = null;
+    for (let attempt = 0; attempt < 15; attempt++) {
+      await new Promise(r => setTimeout(r, 3000));
+
+      // Read LAST_RESULT variable
+      const varRes = await fetch("https://api.github.com/repos/" + repo + "/actions/variables/LAST_RESULT", {
+        headers: {
+          "Authorization": "Bearer " + token,
+          "Accept": "application/vnd.github.v3+json"
+        }
+      });
+
+      if (varRes.ok) {
+        const varData = await varRes.json();
+        if (varData.value && varData.value !== "-" && varData.value.length > 2) {
+          try {
+            data = JSON.parse(varData.value);
+            break;
+          } catch(e) {}
+        }
+      }
+
+      // Update progress
+      const secs = (attempt + 1) * 3 + 5;
+      document.getElementById("results").innerHTML = `
+        <div class="progress-msg">
+          <div class="prog-icon">⚡</div>
+          <div>Checking courts... (${secs}s)<br><small style="font-size:11px;opacity:0.6">Almost there!</small></div>
+        </div>`;
+    }
+
+    if (!data) {
+      // Just read whatever is in LAST_RESULT
+      const varRes = await fetch("https://api.github.com/repos/" + repo + "/actions/variables/LAST_RESULT", {
+        headers: { "Authorization": "Bearer " + token, "Accept": "application/vnd.github.v3+json" }
+      });
+      if (varRes.ok) {
+        const varData = await varRes.json();
+        if (varData.value && varData.value.length > 2) {
+          try { data = JSON.parse(varData.value); } catch(e) {}
+        }
+      }
+    }
+
+    if (!data) {
+      showError("No results yet. The workflow may still be running — try again in a moment.");
+      document.getElementById("results").innerHTML = "";
+      return;
+    }
+
+    lastData = data;
+    renderResults(data);
+
+  } catch(err) {
+    showError("Error: " + err.message);
+    document.getElementById("results").innerHTML = "";
+  } finally {
+    btn.classList.remove("loading");
+    btn.disabled = false;
+  }
+}
+
+function renderResults(data) {
+  const container = document.getElementById("results");
+  container.innerHTML = "";
+
+  let totalAvail = 0;
+  data.forEach(d => d.slots.forEach(s => { if (s.available !== false) totalAvail++; }));
+
+  if (data.length === 0) {
+    container.innerHTML = `<div class="empty-msg"><div class="icon">😔</div><div class="title">No courts available</div><p>All private courts are booked. Check back soon!</p></div>`;
+    document.getElementById("statusBar").style.display = "flex";
+    document.getElementById("availCount").textContent = "0";
+    document.getElementById("checkedAt").innerHTML = "Last checked<br>" + new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+    return;
+  }
+
+  // Status bar
+  document.getElementById("statusBar").style.display = "flex";
+  document.getElementById("availCount").textContent = totalAvail;
+  document.getElementById("checkedAt").innerHTML = "Last checked<br>" + new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+  document.getElementById("toggleRow").style.display = "flex";
+
+  data.forEach(({ date, slots }) => {
+    // The slots from LAST_RESULT are in the format from our gist
+    // Each slot has: court, time, date
+    const visibleSlots = showBooked ? slots : slots;  // all slots from gist are available
+
+    const divider = document.createElement("div");
+    divider.className = "date-divider";
+    divider.textContent = formatDate(date);
+    container.appendChild(divider);
+
+    if (!visibleSlots || visibleSlots.length === 0) return;
+
+    visibleSlots.forEach(slot => {
+      const card = document.createElement("div");
+      card.className = "slot-card available";
+      card.innerHTML = `
+        <div class="slot-dot available"></div>
+        <div class="slot-info">
+          <div class="slot-time">${slot.time || ""}</div>
+          <div class="slot-court">${slot.court || ""}</div>
+        </div>
+        <div class="slot-badge available">FREE</div>
+      `;
+      container.appendChild(card);
+    });
+  });
+}
+
+function showError(msg) {
+  const el = document.getElementById("errorMsg");
+  el.textContent = msg;
+  el.style.display = "block";
+}
+
+function hideError() {
+  document.getElementById("errorMsg").style.display = "none";
+}
+
+// Save settings
+["ghToken","ghRepo"].forEach(id => {
+  document.getElementById(id).addEventListener("change", e => {
+    localStorage.setItem("padel_" + id, e.target.value);
+  });
+});
+
+// Restore settings
+window.addEventListener("load", () => {
+  document.getElementById("ghToken").value = localStorage.getItem("padel_ghToken") || "";
+  document.getElementById("ghRepo").value = localStorage.getItem("padel_ghRepo") || "puffsdad/egp-monitor";
+  initVenues();
+});
+</script>
+
+</body>
+</html>
