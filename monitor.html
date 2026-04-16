@@ -461,7 +461,7 @@ body{min-height:100vh;padding-bottom:40px;background:#0a0f0a;}
 </div>
 <script>
 var BI=[{name:"East Grinstead Padel",loc:"East Grinstead",sub:"eastgrinsteadpadel-gb",home:"EastGrinsteadPadel/HomeEastGrinsteadPadel.aspx",vn:"LAST_RESULT",bi:true},{name:"Bromley Sports Club",loc:"Bromley, London",sub:"bromleysportsclub-gb",home:"index.aspx",vn:"LAST_RESULT",bi:true},{name:"Frindsbury Tennis and Padel",loc:"Rochester, Kent",sub:"frindsburytennisandpadelclub-gb",home:"index.aspx",vn:"LAST_RESULT",bi:true},{name:"Stratford Padel Club",loc:"London E15",sub:"stratfordpadelclub",home:"index.aspx",vn:"LAST_RESULT",bi:true},{name:"UK Padel",loc:"Holmer Green, Bucks",sub:"ukpadel-gb",home:"index.aspx",vn:"LAST_RESULT",bi:true}];
-var venues=[],sv=null,days=7,theme="dark";
+var venues=[],sv=null,days=14,theme="dark";
 function loadAll(){var c=[];try{c=JSON.parse(localStorage.getItem("cv")||"[]");}catch(e){}var en={};try{en=JSON.parse(localStorage.getItem("ve")||"{}");}catch(e){}venues=BI.concat(c);venues.forEach(function(v){v.enabled=typeof en[v.sub]==="undefined"?v.sub==="eastgrinsteadpadel-gb":en[v.sub];});var vis=venues.filter(function(v){return v.enabled;});if(!sv||!vis.includes(sv))sv=vis[0]||venues[0];}
 function saveEn(){var e={};venues.forEach(function(v){e[v.sub]=v.enabled;});localStorage.setItem("ve",JSON.stringify(e));}
 function saveCV(){localStorage.setItem("cv",JSON.stringify(venues.filter(function(v){return !v.bi;})));}
