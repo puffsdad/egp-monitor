@@ -547,8 +547,8 @@ function bookUrl(){return "https://"+sv.sub+".matchpoint.com.es/"+sv.home;}
 async function readResults(){if(!gtok()){se("Please enter your GitHub token in Settings.");return;}he();hi();document.getElementById("res").innerHTML="";document.getElementById("sbar").style.display="none";try{var r=await fetch("https://api.github.com/repos/"+grepo()+"/actions/variables/"+(sv&&sv.vn?sv.vn:"LAST_RESULT"),{headers:{"Authorization":"Bearer "+gtok(),"Accept":"application/vnd.github.v3+json"}});if(!r.ok)throw new Error("Status "+r.status+". Check token in Settings.");var j=await r.json();var v=j.value||"";if(!v||v==="-"||v.length<3){si("No courts available right now. Try tapping REFRESH to get the latest.");return;}var data;try{data=JSON.parse(v);}catch(e){se("Could not parse results. Try REFRESH first.");return;}renderRes(data);}catch(err){se("Error: "+err.message);}finally{}}
 async function triggerRefresh(){if(!gtok()){se("Please enter your GitHub token in Settings.");return;}var b=document.getElementById("refBtn");b.classList.add("loading");b.disabled=true;he();hi();try{var r=await fetch("https://api.github.com/repos/"+grepo()+"/actions/workflows/check-courts.yml/dispatches",{method:"POST",headers:{"Authorization":"Bearer "+gtok(),"Accept":"application/vnd.github.v3+json","Content-Type":"application/json"},body:JSON.stringify({ref:"main"})});if(r.ok||r.status===204){startCountdown();}else throw new Error("Failed "+r.status);}catch(err){se("Error: "+err.message);}}
 function startCountdown(){
-  var n=20;
-  var total=20;
+  var n=30;
+  var total=30;
   var circ=427;
   var overlay=document.getElementById("cdOverlay");
   var dialNum=document.getElementById("dialNum");
@@ -558,48 +558,19 @@ function startCountdown(){
   overlay.classList.add("show");
   if(dialNum)dialNum.textContent=n;
   if(dialArc)dialArc.style.strokeDashoffset="0";
-  var startTime=new Date().toISOString();
   var iv=setInterval(function(){
     n--;
     if(dialNum)dialNum.textContent=n;
     if(dialArc){var pct=(total-n)/total;dialArc.style.strokeDashoffset=String(circ*pct);}
     if(n<=0){
       clearInterval(iv);
-      checkAndLoad(startTime,0,overlay);
-    }
-  },1000);
-}
-function checkAndLoad(startTime,attempt,overlay){
-  fetch("https://api.github.com/repos/"+grepo()+"/actions/variables/LAST_RESULT",{headers:{"Authorization":"Bearer "+gtok(),"Accept":"application/vnd.github.v3+json"}}).then(function(r){return r.json();}).then(function(j){
-    var updatedAt=j.updated_at||"";
-    var isNewer=updatedAt&&(new Date(updatedAt)>new Date(startTime));
-    if(isNewer||attempt>=3){
       overlay.classList.remove("show");
       var b=document.getElementById("refBtn");
       b.classList.remove("loading");
       b.disabled=false;
       readResults();
-    }else{
-      var dialNum=document.getElementById("dialNum");
-      var dialArc=document.getElementById("dialArc");
-      var extra=5;
-      var n=extra;
-      if(dialNum)dialNum.textContent=n;
-      if(dialArc)dialArc.style.strokeDashoffset="0";
-      var iv2=setInterval(function(){
-        n--;
-        if(dialNum)dialNum.textContent=n;
-        if(dialArc){var pct=(extra-n)/extra;dialArc.style.strokeDashoffset=String(427*pct);}
-        if(n<=0){clearInterval(iv2);checkAndLoad(startTime,attempt+1,overlay);}
-      },1000);
     }
-  }).catch(function(){
-    overlay.classList.remove("show");
-    var b=document.getElementById("refBtn");
-    b.classList.remove("loading");
-    b.disabled=false;
-    readResults();
-  });
+  },1000);
 }
 function getArcColor(){var t=document.body.className;if(t.indexOf("t-match")>-1)return "#4169e1";if(t.indexOf("t-egpapp")>-1)return "#4caf7d";if(t.indexOf("t-egpsite")>-1)return "#00b4b4";if(t.indexOf("t-rose")>-1)return "#ff375f";if(t.indexOf("t-light")>-1)return "#34c759";return "#00e676";}
 function renderRes(data){
