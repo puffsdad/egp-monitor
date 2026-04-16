@@ -432,6 +432,21 @@ body{min-height:100vh;padding-bottom:40px;background:#0a0f0a;}
       </div>
     </div>
     <div class="sec">
+      <div class="sec-h">Notifications</div>
+      <div class="sec-b">
+        <div class="lbl">Your Telegram ID</div>
+        <input class="inp" type="text" id="tgid" placeholder="e.g. 8739841377">
+        <div class="hint">Message @myidbot on Telegram to get your ID.</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
+          <div>
+            <div class="lbl" style="margin-bottom:2px;">Court alerts</div>
+            <div class="hint" style="margin:0;">Get a personal Telegram alert when courts become available</div>
+          </div>
+          <div class="toggle" id="alertToggle" onclick="togAlert()" style="margin-left:16px;flex-shrink:0;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
       <div class="sec-h">Venues</div>
       <div id="vtogList"></div>
       <div class="addf">
@@ -483,7 +498,43 @@ function loadTheme(){
   fixHdr(t);
 }
 function showSettings(){document.getElementById("settingsPage").classList.add("active");document.getElementById("mainPage").classList.remove("active");renderTog();}
-function saveSettings(){localStorage.setItem("pt",document.getElementById("tok").value);localStorage.setItem("pr",document.getElementById("repo").value);saveEn();loadAll();document.getElementById("mainPage").classList.add("active");document.getElementById("settingsPage").classList.remove("active");renderGrid();}
+function togAlert(){
+  var t=document.getElementById("alertToggle");
+  t.classList.toggle("on");
+}
+function loadAlertSettings(){
+  var tgid=localStorage.getItem("tgid")||"";
+  var alertOn=localStorage.getItem("alertOn")==="1";
+  document.getElementById("tgid").value=tgid;
+  if(alertOn)document.getElementById("alertToggle").classList.add("on");
+}
+async function saveAlertToGH(tgid,alertOn){
+  if(!gtok())return;
+  try{
+    var r=await fetch("https://api.github.com/repos/"+grepo()+"/actions/variables/ALERT_IDS",{headers:{"Authorization":"Bearer "+gtok(),"Accept":"application/vnd.github.v3+json"}});
+    var current=[];
+    if(r.ok){var j=await r.json();try{current=JSON.parse(j.value||"[]");}catch(e){current=[];}}
+    if(alertOn&&tgid){
+      if(!current.includes(tgid))current.push(tgid);
+    }else{
+      current=current.filter(function(id){return id!==tgid;});
+    }
+    await fetch("https://api.github.com/repos/"+grepo()+"/actions/variables/ALERT_IDS",{method:"PATCH",headers:{"Authorization":"Bearer "+gtok(),"Accept":"application/vnd.github.v3+json","Content-Type":"application/json"},body:JSON.stringify({name:"ALERT_IDS",value:JSON.stringify(current)})});
+  }catch(e){console.log("Alert save err: "+e.message);}
+}
+function saveSettings(){
+  localStorage.setItem("pt",document.getElementById("tok").value);
+  localStorage.setItem("pr",document.getElementById("repo").value);
+  var tgid=document.getElementById("tgid").value.trim();
+  var alertOn=document.getElementById("alertToggle").classList.contains("on");
+  localStorage.setItem("tgid",tgid);
+  localStorage.setItem("alertOn",alertOn?"1":"0");
+  saveAlertToGH(tgid,alertOn);
+  saveEn();loadAll();
+  document.getElementById("mainPage").classList.add("active");
+  document.getElementById("settingsPage").classList.remove("active");
+  renderGrid();
+}
 function renderTog(){var l=document.getElementById("vtogList");l.innerHTML="";venues.forEach(function(v,i){var r=document.createElement("div");r.className="vtog-row";r.innerHTML='<div class="vtog-info"><div class="vtog-name">'+v.name+'</div><div class="vtog-loc">'+v.loc+'</div></div><div class="toggle'+(v.enabled?" on":"")+'" id="tog'+i+'" onclick="tog('+i+')"></div>';l.appendChild(r);});}
 function tog(i){venues[i].enabled=!venues[i].enabled;var e=document.getElementById("tog"+i);if(e)e.classList.toggle("on",venues[i].enabled);}
 function addVenue(){var n=document.getElementById("nn").value.trim();var l=document.getElementById("nl").value.trim();var s=document.getElementById("ns").value.trim();if(!n||!s){alert("Please fill in name and subdomain.");return;}venues.push({name:n,loc:l,sub:s,home:"index.aspx",vn:"LAST_RESULT",bi:false,enabled:true});saveCV();document.getElementById("nn").value="";document.getElementById("nl").value="";document.getElementById("ns").value="";renderTog();}
@@ -525,7 +576,7 @@ function startCountdown(){
 }
 function getArcColor(){var t=document.body.className;if(t.indexOf("t-match")>-1)return "#4169e1";if(t.indexOf("t-egpapp")>-1)return "#4caf7d";if(t.indexOf("t-egpsite")>-1)return "#00b4b4";if(t.indexOf("t-rose")>-1)return "#ff375f";if(t.indexOf("t-light")>-1)return "#34c759";return "#00e676";}
 function renderRes(data){var c=document.getElementById("res");c.innerHTML="";var tot=0;data.forEach(function(d){tot+=(d.slots||[]).length;});document.getElementById("sbar").style.display="flex";document.getElementById("snum").textContent=tot;document.getElementById("sat").innerHTML="Last checked<br>"+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});if(tot===0){c.innerHTML='<div class="empty"><div class="ei">&#128614;</div><div class="et">No courts available</div><p>All courts are booked. Try refreshing!</p></div>';return;}data.forEach(function(entry){var slots=entry.slots||[];if(!slots.length)return;var dv=document.createElement("div");dv.className="ddiv";dv.textContent=fmtDate(entry.date);c.appendChild(dv);slots.forEach(function(slot){var sc=document.createElement("div");sc.className="scard";sc.innerHTML='<div class="sdot"></div><div class="sinfo"><div class="stime">'+(slot.time||"")+'</div><div class="scourt">'+(slot.court||"")+'</div></div><div class="bbtn">BOOK</div>';sc.onclick=function(){window.open(bookUrl(),"_blank");};c.appendChild(sc);});});}
-window.addEventListener("load",function(){loadTheme();loadAll();document.getElementById("tok").value=localStorage.getItem("pt")||"";document.getElementById("repo").value=localStorage.getItem("pr")||"puffsdad/egp-monitor";renderGrid();readResults();});
+window.addEventListener("load",function(){loadTheme();loadAll();document.getElementById("tok").value=localStorage.getItem("pt")||"";document.getElementById("repo").value=localStorage.getItem("pr")||"puffsdad/egp-monitor";loadAlertSettings();renderGrid();readResults();});
 </script>
 <div class="countdown-overlay" id="cdOverlay">
   <div class="countdown-box">
