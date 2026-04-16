@@ -498,8 +498,8 @@ function bookUrl(){return "https://"+sv.sub+".matchpoint.com.es/"+sv.home;}
 async function readResults(){if(!gtok()){se("Please enter your GitHub token in Settings.");return;}var b=document.getElementById("showBtn");b.classList.add("loading");b.disabled=true;he();hi();document.getElementById("res").innerHTML="";document.getElementById("sbar").style.display="none";try{var r=await fetch("https://api.github.com/repos/"+grepo()+"/actions/variables/"+(sv&&sv.vn?sv.vn:"LAST_RESULT"),{headers:{"Authorization":"Bearer "+gtok(),"Accept":"application/vnd.github.v3+json"}});if(!r.ok)throw new Error("Status "+r.status+". Check token in Settings.");var j=await r.json();var v=j.value||"";if(!v||v==="-"||v.length<3){si("No courts available right now. Try tapping REFRESH to get the latest.");return;}var data;try{data=JSON.parse(v);}catch(e){se("Could not parse results. Try REFRESH first.");return;}renderRes(data);}catch(err){se("Error: "+err.message);}finally{b.classList.remove("loading");b.disabled=false;}}
 async function triggerRefresh(){if(!gtok()){se("Please enter your GitHub token in Settings.");return;}var b=document.getElementById("refBtn");b.classList.add("loading");b.disabled=true;he();hi();try{var r=await fetch("https://api.github.com/repos/"+grepo()+"/actions/workflows/check-courts.yml/dispatches",{method:"POST",headers:{"Authorization":"Bearer "+gtok(),"Accept":"application/vnd.github.v3+json","Content-Type":"application/json"},body:JSON.stringify({ref:"main"})});if(r.ok||r.status===204){startCountdown();}else throw new Error("Failed "+r.status);}catch(err){se("Error: "+err.message);b.classList.remove("loading");b.disabled=false;}}
 function startCountdown(){
-  var n=20;
-  var total=20;
+  var n=15;
+  var total=15;
   var circ=427;
   var overlay=document.getElementById("cdOverlay");
   var dialNum=document.getElementById("dialNum");
