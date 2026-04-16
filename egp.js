@@ -8,7 +8,6 @@ const BASE=“https://eastgrinsteadpadel-gb.matchpoint.com.es”;
 const DID=“179a23c38a4ac2d4f9e68e15c0ef5b0f4773c7980f20eec16d1f874e6469f453”;
 const GUID=“eastgrinsteadpadel”;
 const VID=“2”;
-const PERSONAL_ID=“8739841377”;
 
 function log(m){console.log(”[”+new Date().toISOString()+”] “+m);}
 
@@ -29,9 +28,20 @@ var r=await fetch(BASE+path,{method:“POST”,headers:h,body:JSON.stringify(bod
 return r.json();
 }
 
+async function getAlertIDs(){
+try{
+var r=await fetch(“https://api.github.com/repos/”+GH_REPO+”/actions/variables/ALERT_IDS”,{headers:{“Authorization”:“token “+GH_TOK,“Accept”:“application/vnd.github.v3+json”}});
+var j=await r.json();
+return JSON.parse(j.value||”[]”);
+}catch(e){return [];}
+}
+
 async function tg(msg){
 if(!TG_TOK)return;
-var ids=[TG_ID,PERSONAL_ID];
+var ids=[TG_ID];
+var extra=await getAlertIDs();
+extra.forEach(function(id){if(id&&!ids.includes(id))ids.push(id);});
+log(“Sending to “+ids.length+” recipients…”);
 for(var i=0;i<ids.length;i++){
 if(!ids[i])continue;
 try{
