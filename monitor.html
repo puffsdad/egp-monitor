@@ -558,22 +558,22 @@ function startCountdown(){
   overlay.classList.add("show");
   if(dialNum)dialNum.textContent=n;
   if(dialArc)dialArc.style.strokeDashoffset="0";
-  var lastVal="";
-  fetch("https://api.github.com/repos/"+grepo()+"/actions/variables/LAST_RESULT",{headers:{"Authorization":"Bearer "+gtok(),"Accept":"application/vnd.github.v3+json"}}).then(function(r){return r.json();}).then(function(j){lastVal=j.value||"";}).catch(function(){});
+  var startTime=new Date().toISOString();
   var iv=setInterval(function(){
     n--;
     if(dialNum)dialNum.textContent=n;
     if(dialArc){var pct=(total-n)/total;dialArc.style.strokeDashoffset=String(circ*pct);}
     if(n<=0){
       clearInterval(iv);
-      checkAndLoad(lastVal,0,overlay);
+      checkAndLoad(startTime,0,overlay);
     }
   },1000);
 }
-function checkAndLoad(oldVal,attempt,overlay){
+function checkAndLoad(startTime,attempt,overlay){
   fetch("https://api.github.com/repos/"+grepo()+"/actions/variables/LAST_RESULT",{headers:{"Authorization":"Bearer "+gtok(),"Accept":"application/vnd.github.v3+json"}}).then(function(r){return r.json();}).then(function(j){
-    var newVal=j.value||"";
-    if(newVal!==oldVal||attempt>=4){
+    var updatedAt=j.updated_at||"";
+    var isNewer=updatedAt&&(new Date(updatedAt)>new Date(startTime));
+    if(isNewer||attempt>=3){
       overlay.classList.remove("show");
       var b=document.getElementById("refBtn");
       b.classList.remove("loading");
@@ -590,7 +590,7 @@ function checkAndLoad(oldVal,attempt,overlay){
         n--;
         if(dialNum)dialNum.textContent=n;
         if(dialArc){var pct=(extra-n)/extra;dialArc.style.strokeDashoffset=String(427*pct);}
-        if(n<=0){clearInterval(iv2);checkAndLoad(oldVal,attempt+1,overlay);}
+        if(n<=0){clearInterval(iv2);checkAndLoad(startTime,attempt+1,overlay);}
       },1000);
     }
   }).catch(function(){
