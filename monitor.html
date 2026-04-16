@@ -390,11 +390,8 @@ body{min-height:100vh;padding-bottom:40px;background:#0a0f0a;}
       </div>
     </div>
     <div class="btns">
-      <button class="btn btn-g" id="showBtn" onclick="readResults()">
-        <span class="bt">SHOW RESULTS</span><div class="sp"></div>
-      </button>
-      <button class="btn btn-d" id="refBtn" onclick="triggerRefresh()">
-        <span class="bt">REFRESH</span><div class="sp"></div>
+      <button class="btn btn-g" id="refBtn" onclick="triggerRefresh()">
+        <span class="bt">CHECK COURTS</span><div class="sp"></div>
       </button>
     </div>
     <div class="emsg" id="emsg"></div>
@@ -546,8 +543,8 @@ function si(m){var e=document.getElementById("imsg");e.textContent=m;e.style.dis
 function hi(){document.getElementById("imsg").style.display="none";}
 function fmtDate(s){var p=s.split("/");var d=new Date(p[2],p[1]-1,p[0]);var dn=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];var mn=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];var t=new Date(),tm=new Date();tm.setDate(t.getDate()+1);if(d.toDateString()===t.toDateString())return "TODAY";if(d.toDateString()===tm.toDateString())return "TOMORROW";return dn[d.getDay()]+" "+p[0]+" "+mn[d.getMonth()];}
 function bookUrl(){return "https://"+sv.sub+".matchpoint.com.es/"+sv.home;}
-async function readResults(){if(!gtok()){se("Please enter your GitHub token in Settings.");return;}var b=document.getElementById("showBtn");b.classList.add("loading");b.disabled=true;he();hi();document.getElementById("res").innerHTML="";document.getElementById("sbar").style.display="none";try{var r=await fetch("https://api.github.com/repos/"+grepo()+"/actions/variables/"+(sv&&sv.vn?sv.vn:"LAST_RESULT"),{headers:{"Authorization":"Bearer "+gtok(),"Accept":"application/vnd.github.v3+json"}});if(!r.ok)throw new Error("Status "+r.status+". Check token in Settings.");var j=await r.json();var v=j.value||"";if(!v||v==="-"||v.length<3){si("No courts available right now. Try tapping REFRESH to get the latest.");return;}var data;try{data=JSON.parse(v);}catch(e){se("Could not parse results. Try REFRESH first.");return;}renderRes(data);}catch(err){se("Error: "+err.message);}finally{b.classList.remove("loading");b.disabled=false;}}
-async function triggerRefresh(){if(!gtok()){se("Please enter your GitHub token in Settings.");return;}var b=document.getElementById("refBtn");b.classList.add("loading");b.disabled=true;he();hi();try{var r=await fetch("https://api.github.com/repos/"+grepo()+"/actions/workflows/check-courts.yml/dispatches",{method:"POST",headers:{"Authorization":"Bearer "+gtok(),"Accept":"application/vnd.github.v3+json","Content-Type":"application/json"},body:JSON.stringify({ref:"main"})});if(r.ok||r.status===204){startCountdown();}else throw new Error("Failed "+r.status);}catch(err){se("Error: "+err.message);b.classList.remove("loading");b.disabled=false;}}
+async function readResults(){if(!gtok()){se("Please enter your GitHub token in Settings.");return;}he();hi();document.getElementById("res").innerHTML="";document.getElementById("sbar").style.display="none";try{var r=await fetch("https://api.github.com/repos/"+grepo()+"/actions/variables/"+(sv&&sv.vn?sv.vn:"LAST_RESULT"),{headers:{"Authorization":"Bearer "+gtok(),"Accept":"application/vnd.github.v3+json"}});if(!r.ok)throw new Error("Status "+r.status+". Check token in Settings.");var j=await r.json();var v=j.value||"";if(!v||v==="-"||v.length<3){si("No courts available right now. Try tapping REFRESH to get the latest.");return;}var data;try{data=JSON.parse(v);}catch(e){se("Could not parse results. Try REFRESH first.");return;}renderRes(data);}catch(err){se("Error: "+err.message);}finally{}}
+async function triggerRefresh(){if(!gtok()){se("Please enter your GitHub token in Settings.");return;}var b=document.getElementById("refBtn");b.classList.add("loading");b.disabled=true;he();hi();try{var r=await fetch("https://api.github.com/repos/"+grepo()+"/actions/workflows/check-courts.yml/dispatches",{method:"POST",headers:{"Authorization":"Bearer "+gtok(),"Accept":"application/vnd.github.v3+json","Content-Type":"application/json"},body:JSON.stringify({ref:"main"})});if(r.ok||r.status===204){startCountdown();}else throw new Error("Failed "+r.status);}catch(err){se("Error: "+err.message);}}
 function startCountdown(){
   var n=15;
   var total=15;
