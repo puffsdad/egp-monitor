@@ -383,7 +383,7 @@ body{min-height:100vh;padding-bottom:40px;background:#0a0f0a;}
         <div class="chips" id="chips">
           <div class="chip" data-d="1">Today</div>
           <div class="chip" data-d="3">3 days</div>
-          <div class="chip sel" data-d="7">7 days</div>
+          <div class="chip sel" data-d="14">14 days</div>
           <div class="chip" data-d="10">10 days</div>
           <div class="chip" data-d="14">14 days</div>
         </div>
@@ -575,7 +575,16 @@ function startCountdown(){
   },1000);
 }
 function getArcColor(){var t=document.body.className;if(t.indexOf("t-match")>-1)return "#4169e1";if(t.indexOf("t-egpapp")>-1)return "#4caf7d";if(t.indexOf("t-egpsite")>-1)return "#00b4b4";if(t.indexOf("t-rose")>-1)return "#ff375f";if(t.indexOf("t-light")>-1)return "#34c759";return "#00e676";}
-function renderRes(data){var c=document.getElementById("res");c.innerHTML="";var tot=0;data.forEach(function(d){tot+=(d.slots||[]).length;});document.getElementById("sbar").style.display="flex";document.getElementById("snum").textContent=tot;document.getElementById("sat").innerHTML="Last checked<br>"+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});if(tot===0){c.innerHTML='<div class="empty"><div class="ei">&#128614;</div><div class="et">No courts available</div><p>All courts are booked. Try refreshing!</p></div>';return;}data.forEach(function(entry){var slots=entry.slots||[];if(!slots.length)return;var dv=document.createElement("div");dv.className="ddiv";dv.textContent=fmtDate(entry.date);c.appendChild(dv);slots.forEach(function(slot){var sc=document.createElement("div");sc.className="scard";sc.innerHTML='<div class="sdot"></div><div class="sinfo"><div class="stime">'+(slot.time||"")+'</div><div class="scourt">'+(slot.court||"")+'</div></div><div class="bbtn">BOOK</div>';sc.onclick=function(){window.open(bookUrl(),"_blank");};c.appendChild(sc);});});}
+function renderRes(data){
+  var c=document.getElementById("res");c.innerHTML="";
+  var cutoff=new Date();cutoff.setDate(cutoff.getDate()+days);
+  var filtered=data.filter(function(entry){
+    var p=entry.date.split("/");
+    var d=new Date(p[2],p[1]-1,p[0]);
+    return d<=cutoff;
+  });
+  var tot=0;filtered.forEach(function(d){tot+=(d.slots||[]).length;});
+  data=filtered;document.getElementById("sbar").style.display="flex";document.getElementById("snum").textContent=tot;document.getElementById("sat").innerHTML="Last checked<br>"+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});if(tot===0){c.innerHTML='<div class="empty"><div class="ei">&#128614;</div><div class="et">No courts available</div><p>All courts are booked. Try refreshing!</p></div>';return;}data.forEach(function(entry){var slots=entry.slots||[];if(!slots.length)return;var dv=document.createElement("div");dv.className="ddiv";dv.textContent=fmtDate(entry.date);c.appendChild(dv);slots.forEach(function(slot){var sc=document.createElement("div");sc.className="scard";sc.innerHTML='<div class="sdot"></div><div class="sinfo"><div class="stime">'+(slot.time||"")+'</div><div class="scourt">'+(slot.court||"")+'</div></div><div class="bbtn">BOOK</div>';sc.onclick=function(){window.open(bookUrl(),"_blank");};c.appendChild(sc);});});}
 window.addEventListener("load",function(){loadTheme();loadAll();document.getElementById("tok").value=localStorage.getItem("pt")||"";document.getElementById("repo").value=localStorage.getItem("pr")||"puffsdad/egp-monitor";loadAlertSettings();renderGrid();readResults();});
 </script>
 <div class="countdown-overlay" id="cdOverlay">
