@@ -558,19 +558,48 @@ function startCountdown(){
   overlay.classList.add("show");
   if(dialNum)dialNum.textContent=n;
   if(dialArc)dialArc.style.strokeDashoffset="0";
+  var lastVal="";
+  fetch("https://api.github.com/repos/"+grepo()+"/actions/variables/LAST_RESULT",{headers:{"Authorization":"Bearer "+gtok(),"Accept":"application/vnd.github.v3+json"}}).then(function(r){return r.json();}).then(function(j){lastVal=j.value||"";}).catch(function(){});
   var iv=setInterval(function(){
     n--;
     if(dialNum)dialNum.textContent=n;
     if(dialArc){var pct=(total-n)/total;dialArc.style.strokeDashoffset=String(circ*pct);}
     if(n<=0){
       clearInterval(iv);
+      checkAndLoad(lastVal,0,overlay);
+    }
+  },1000);
+}
+function checkAndLoad(oldVal,attempt,overlay){
+  fetch("https://api.github.com/repos/"+grepo()+"/actions/variables/LAST_RESULT",{headers:{"Authorization":"Bearer "+gtok(),"Accept":"application/vnd.github.v3+json"}}).then(function(r){return r.json();}).then(function(j){
+    var newVal=j.value||"";
+    if(newVal!==oldVal||attempt>=4){
       overlay.classList.remove("show");
       var b=document.getElementById("refBtn");
       b.classList.remove("loading");
       b.disabled=false;
       readResults();
+    }else{
+      var dialNum=document.getElementById("dialNum");
+      var dialArc=document.getElementById("dialArc");
+      var extra=5;
+      var n=extra;
+      if(dialNum)dialNum.textContent=n;
+      if(dialArc)dialArc.style.strokeDashoffset="0";
+      var iv2=setInterval(function(){
+        n--;
+        if(dialNum)dialNum.textContent=n;
+        if(dialArc){var pct=(extra-n)/extra;dialArc.style.strokeDashoffset=String(427*pct);}
+        if(n<=0){clearInterval(iv2);checkAndLoad(oldVal,attempt+1,overlay);}
+      },1000);
     }
-  },1000);
+  }).catch(function(){
+    overlay.classList.remove("show");
+    var b=document.getElementById("refBtn");
+    b.classList.remove("loading");
+    b.disabled=false;
+    readResults();
+  });
 }
 function getArcColor(){var t=document.body.className;if(t.indexOf("t-match")>-1)return "#4169e1";if(t.indexOf("t-egpapp")>-1)return "#4caf7d";if(t.indexOf("t-egpsite")>-1)return "#00b4b4";if(t.indexOf("t-rose")>-1)return "#ff375f";if(t.indexOf("t-light")>-1)return "#34c759";return "#00e676";}
 function renderRes(data){
