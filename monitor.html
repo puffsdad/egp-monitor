@@ -465,7 +465,7 @@ var venues=[],sv=null,days=14,theme="dark";
 function loadAll(){var c=[];try{c=JSON.parse(localStorage.getItem("cv")||"[]");}catch(e){}var en={};try{en=JSON.parse(localStorage.getItem("ve")||"{}");}catch(e){}venues=BI.concat(c);venues.forEach(function(v){v.enabled=typeof en[v.sub]==="undefined"?v.sub==="eastgrinsteadpadel-gb":en[v.sub];});var vis=venues.filter(function(v){return v.enabled;});if(!sv||!vis.includes(sv))sv=vis[0]||venues[0];}
 function saveEn(){var e={};venues.forEach(function(v){e[v.sub]=v.enabled;});localStorage.setItem("ve",JSON.stringify(e));}
 function saveCV(){localStorage.setItem("cv",JSON.stringify(venues.filter(function(v){return !v.bi;})));}
-function gtok(){return document.getElementById("tok").value.trim();}
+function gtok(){var t=document.getElementById("tok").value.trim();if(!t){t=localStorage.getItem("pt")||sessionStorage.getItem("pt")||"";}return t;}
 function grepo(){return document.getElementById("repo").value.trim()||"puffsdad/egp-monitor";}
 function setTheme(t,el){
   theme=t;
@@ -521,8 +521,8 @@ async function saveAlertToGH(tgid,alertOn){
   }catch(e){console.log("Alert save err: "+e.message);}
 }
 function saveSettings(){
-  localStorage.setItem("pt",document.getElementById("tok").value);
-  localStorage.setItem("pr",document.getElementById("repo").value);
+  localStorage.setItem("pt",document.getElementById("tok").value);sessionStorage.setItem("pt",document.getElementById("tok").value);
+  localStorage.setItem("pr",document.getElementById("repo").value);sessionStorage.setItem("pr",document.getElementById("repo").value);
   var tgid=document.getElementById("tgid").value.trim();
   var alertOn=document.getElementById("alertToggle").classList.contains("on");
   localStorage.setItem("tgid",tgid);
@@ -607,7 +607,7 @@ function renderRes(data){
   });
   var tot=0;filtered.forEach(function(d){tot+=(d.slots||[]).length;});
   data=filtered;document.getElementById("sbar").style.display="flex";document.getElementById("snum").textContent=tot;document.getElementById("sat").innerHTML="Last checked<br>"+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});if(tot===0){c.innerHTML='<div class="empty"><div class="ei">&#128614;</div><div class="et">No courts available</div><p>All courts are booked. Try refreshing!</p></div>';return;}data.forEach(function(entry){var slots=entry.slots||[];if(!slots.length)return;var dv=document.createElement("div");dv.className="ddiv";dv.textContent=fmtDate(entry.date);c.appendChild(dv);slots.forEach(function(slot){var sc=document.createElement("div");sc.className="scard";sc.innerHTML='<div class="sdot"></div><div class="sinfo"><div class="stime">'+(slot.time||"")+'</div><div class="scourt">'+(slot.court||"")+'</div></div><div class="bbtn">BOOK</div>';sc.onclick=function(){window.open(bookUrl(),"_blank");};c.appendChild(sc);});});}
-window.addEventListener("load",function(){loadTheme();loadAll();document.getElementById("tok").value=localStorage.getItem("pt")||"";document.getElementById("repo").value=localStorage.getItem("pr")||"puffsdad/egp-monitor";loadAlertSettings();renderGrid();readResults();});
+window.addEventListener("load",function(){loadTheme();loadAll();document.getElementById("tok").value=localStorage.getItem("pt")||sessionStorage.getItem("pt")||"";document.getElementById("repo").value=localStorage.getItem("pr")||sessionStorage.getItem("pr")||"puffsdad/egp-monitor";loadAlertSettings();renderGrid();readResults();});
 </script>
 <div class="countdown-overlay" id="cdOverlay">
   <div class="countdown-box">
