@@ -597,7 +597,7 @@ function pollWorkflow(triggerTime,overlay,iv){
 function getArcColor(){var t=document.body.className;if(t.indexOf("t-match")>-1)return "#4169e1";if(t.indexOf("t-egpapp")>-1)return "#4caf7d";if(t.indexOf("t-egpsite")>-1)return "#00b4b4";if(t.indexOf("t-rose")>-1)return "#ff375f";if(t.indexOf("t-light")>-1)return "#34c759";return "#00e676";}
 function renderRes(data){
   var c=document.getElementById("res");c.innerHTML="";
-  var cutoff=new Date();cutoff.setDate(cutoff.getDate()+days);
+  var cutoff=new Date();cutoff.setDate(cutoff.getDate()+days);cutoff.setHours(23,59,59,999);
   var filtered=data.filter(function(entry){
     var p=entry.date.split("/");
     var d=new Date(p[2],p[1]-1,p[0]);
