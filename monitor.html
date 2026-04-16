@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html>
 <head>
 <meta charset="UTF-8">
@@ -155,11 +156,11 @@ input:focus{border-color:#00e676;}
 
 <script>
 var BI=[
-  {name:"East Grinstead Padel",loc:"East Grinstead",sub:"eastgrinsteadpadel-gb",bi:true},
-  {name:"Bromley Sports Club",loc:"Bromley, London",sub:"bromleysportsclub-gb",bi:true},
-  {name:"Frindsbury Tennis & Padel",loc:"Rochester, Kent",sub:"frindsburytennisandpadelclub-gb",bi:true},
-  {name:"Stratford Padel Club",loc:"London E15",sub:"stratfordpadelclub",bi:true},
-  {name:"UK Padel",loc:"Holmer Green, Bucks",sub:"ukpadel-gb",bi:true}
+  {name:"East Grinstead Padel",loc:"East Grinstead",sub:"eastgrinsteadpadel-gb",home:"EastGrinsteadPadel/HomeEastGrinsteadPadel.aspx",bi:true},
+  {name:"Bromley Sports Club",loc:"Bromley, London",sub:"bromleysportsclub-gb",home:"index.aspx",bi:true},
+  {name:"Frindsbury Tennis & Padel",loc:"Rochester, Kent",sub:"frindsburytennisandpadelclub-gb",home:"index.aspx",bi:true},
+  {name:"Stratford Padel Club",loc:"London E15",sub:"stratfordpadelclub",home:"index.aspx",bi:true},
+  {name:"UK Padel",loc:"Holmer Green, Bucks",sub:"ukpadel-gb",home:"index.aspx",bi:true}
 ];
 var venues=[],sv=null,days=7;
 
@@ -228,7 +229,7 @@ function addVenue(){
   var l=document.getElementById("nl").value.trim();
   var s=document.getElementById("ns").value.trim();
   if(!n||!s){alert("Please enter venue name and subdomain.");return;}
-  venues.push({name:n,loc:l||"",sub:s,bi:false});
+  venues.push({name:n,loc:l||"",sub:s,home:"index.aspx",bi:false});
   saveCV();
   document.getElementById("nn").value="";
   document.getElementById("nl").value="";
@@ -255,15 +256,14 @@ function fmtDate(s){
   var dn=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
   var mn=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   var t=new Date(),tm=new Date();tm.setDate(t.getDate()+1);
-  if(d.toDateString()===t.toDateString())return"TODAY";
-  if(d.toDateString()===tm.toDateString())return"TOMORROW";
+  if(d.toDateString()===t.toDateString())return "TODAY";
+  if(d.toDateString()===tm.toDateString())return "TOMORROW";
   return dn[d.getDay()]+" "+p[0]+" "+mn[d.getMonth()];
 }
 
 function bookUrl(fecha){
-  var p=fecha.split("/");
-  var ds=p[2]+"-"+p[1]+"-"+p[0];
-  return"https://"+sv.sub+".matchpoint.com.es/Bookings/CreateBooking.aspx?date="+ds;
+  var base="https://"+sv.sub+".matchpoint.com.es";
+  return base+"/"+sv.home;
 }
 
 async function readResults(){
@@ -342,5 +342,6 @@ window.addEventListener("load",function(){
   readResults();
 });
 </script>
+
 </body>
 </html>
