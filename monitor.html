@@ -527,5 +527,21 @@ function getArcColor(){var t=document.body.className;if(t.indexOf("t-match")>-1)
 function renderRes(data){var c=document.getElementById("res");c.innerHTML="";var tot=0;data.forEach(function(d){tot+=(d.slots||[]).length;});document.getElementById("sbar").style.display="flex";document.getElementById("snum").textContent=tot;document.getElementById("sat").innerHTML="Last checked<br>"+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});if(tot===0){c.innerHTML='<div class="empty"><div class="ei">&#128614;</div><div class="et">No courts available</div><p>All courts are booked. Try refreshing!</p></div>';return;}data.forEach(function(entry){var slots=entry.slots||[];if(!slots.length)return;var dv=document.createElement("div");dv.className="ddiv";dv.textContent=fmtDate(entry.date);c.appendChild(dv);slots.forEach(function(slot){var sc=document.createElement("div");sc.className="scard";sc.innerHTML='<div class="sdot"></div><div class="sinfo"><div class="stime">'+(slot.time||"")+'</div><div class="scourt">'+(slot.court||"")+'</div></div><div class="bbtn">BOOK</div>';sc.onclick=function(){window.open(bookUrl(),"_blank");};c.appendChild(sc);});});}
 window.addEventListener("load",function(){loadTheme();loadAll();document.getElementById("tok").value=localStorage.getItem("pt")||"";document.getElementById("repo").value=localStorage.getItem("pr")||"puffsdad/egp-monitor";renderGrid();readResults();});
 </script>
+<div class="countdown-overlay" id="cdOverlay">
+  <div class="countdown-box">
+    <div class="countdown-label">FETCHING RESULTS</div>
+    <div class="dial-wrap">
+      <svg viewBox="0 0 160 160" width="160" height="160">
+        <circle cx="80" cy="80" r="68" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="8"/>
+        <circle id="dialArc" cx="80" cy="80" r="68" fill="none" stroke="#00e676" stroke-width="8" stroke-linecap="round" stroke-dasharray="427" stroke-dashoffset="0"/>
+      </svg>
+      <div class="dial-center">
+        <div class="dial-num" id="dialNum">20</div>
+        <div class="dial-sec">secs</div>
+      </div>
+    </div>
+    <div class="countdown-sub">Loading your courts...</div>
+  </div>
+</div>
 </body>
 </html>
