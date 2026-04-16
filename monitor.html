@@ -557,6 +557,8 @@ function startCountdown(){
   overlay.classList.add("show");
   var elapsed=0;
   var maxWait=15;
+  if(dialNum)dialNum.textContent=maxWait;
+  if(dialArc)dialArc.style.strokeDashoffset="0";
   var iv=setInterval(function(){
     elapsed++;
     var remaining=maxWait-elapsed;
