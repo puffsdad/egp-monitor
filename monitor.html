@@ -442,6 +442,13 @@ body{min-height:100vh;padding-bottom:40px;background:#0a0f0a;}
           </div>
           <div class="toggle" id="alertToggle" onclick="togAlert()" style="margin-left:16px;flex-shrink:0;"></div>
         </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;">
+          <div>
+            <div class="lbl" style="margin-bottom:2px;">General availability alerts</div>
+            <div class="hint" style="margin:0;">Alert when any court opens up in the next 14 days</div>
+          </div>
+          <div class="toggle" id="generalToggle" onclick="togGeneral()" style="margin-left:16px;flex-shrink:0;"></div>
+        </div>
       </div>
     </div>
     <div class="sec">
@@ -554,15 +561,23 @@ async function saveWatchDatesToGH(dates){
     await fetch("https://api.github.com/repos/"+grepo()+"/actions/variables/WATCH_DATES",{method:"PATCH",headers:{"Authorization":"Bearer "+gtok(),"Accept":"application/vnd.github.v3+json","Content-Type":"application/json"},body:JSON.stringify({name:"WATCH_DATES",value:JSON.stringify(dates)})});
   }catch(e){console.log("Watch date save err: "+e.message);}
 }
-function togAlert(){
+function togGeneral(){var t=document.getElementById("generalToggle");t.classList.toggle("on");}function togAlert(){
   var t=document.getElementById("alertToggle");
   t.classList.toggle("on");
 }
 function loadAlertSettings(){
   var tgid=localStorage.getItem("tgid")||"";
   var alertOn=localStorage.getItem("alertOn")==="1";
+  var generalOn=localStorage.getItem("generalOn")!=="0";
   document.getElementById("tgid").value=tgid;
   if(alertOn)document.getElementById("alertToggle").classList.add("on");
+  if(generalOn)document.getElementById("generalToggle").classList.add("on");
+}
+async function saveGeneralAlertToGH(on){
+  if(!gtok())return;
+  try{
+    await fetch("https://api.github.com/repos/"+grepo()+"/actions/variables/GENERAL_ALERTS_OFF",{method:"PATCH",headers:{"Authorization":"Bearer "+gtok(),"Accept":"application/vnd.github.v3+json","Content-Type":"application/json"},body:JSON.stringify({name:"GENERAL_ALERTS_OFF",value:on?"0":"1"})});
+  }catch(e){console.log("General alert save err: "+e.message);}
 }
 async function saveAlertToGH(tgid,alertOn){
   if(!gtok())return;
@@ -583,9 +598,12 @@ function saveSettings(){
   localStorage.setItem("pr",document.getElementById("repo").value);sessionStorage.setItem("pr",document.getElementById("repo").value);
   var tgid=document.getElementById("tgid").value.trim();
   var alertOn=document.getElementById("alertToggle").classList.contains("on");
+  var generalOn=document.getElementById("generalToggle").classList.contains("on");
   localStorage.setItem("tgid",tgid);
   localStorage.setItem("alertOn",alertOn?"1":"0");
+  localStorage.setItem("generalOn",generalOn?"1":"0");
   saveAlertToGH(tgid,alertOn);
+  saveGeneralAlertToGH(generalOn);
   saveEn();loadAll();
   document.getElementById("mainPage").classList.add("active");
   document.getElementById("settingsPage").classList.remove("active");
