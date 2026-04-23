@@ -46,6 +46,7 @@ log(“Checking “+watchDates.length+” watch dates…”);
 var watchMsg=””;
 watchDates.forEach(function(iso){
 var dmy=isoToDmy(iso);
+log(“Checking watch date: “+iso+” = “+dmy);
 var entry=res.find(function(e){return e.date===dmy;});
 if(entry&&entry.slots.length>0){
 watchMsg+=”\n”+fmtDate(dmy)+”\n”;
