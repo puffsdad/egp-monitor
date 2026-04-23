@@ -445,6 +445,16 @@ body{min-height:100vh;padding-bottom:40px;background:#0a0f0a;}
       </div>
     </div>
     <div class="sec">
+      <div class="sec-h">Watch Dates</div>
+      <div class="sec-b">
+        <div class="lbl">Add a date to watch</div>
+        <input class="inp" type="date" id="watchDate">
+        <div class="hint">Get a priority alert if a court becomes available on this date.</div>
+        <button class="addbtn" onclick="addWatchDate()" style="margin-top:4px;">+ Add Watch Date</button>
+      </div>
+      <div id="watchList"></div>
+    </div>
+    <div class="sec">
       <div class="sec-h">Venues</div>
       <div id="vtogList"></div>
       <div class="addf">
@@ -496,6 +506,54 @@ function loadTheme(){
   fixHdr(t);
 }
 function showSettings(){document.getElementById("settingsPage").classList.add("active");document.getElementById("mainPage").classList.remove("active");renderTog();}
+function loadWatchDates(){
+  var dates=[];
+  try{dates=JSON.parse(localStorage.getItem("wd")||"[]");}catch(e){}
+  renderWatchList(dates);
+}
+function renderWatchList(dates){
+  var list=document.getElementById("watchList");
+  if(!list)return;
+  list.innerHTML="";
+  if(!dates.length)return;
+  dates.forEach(function(d,i){
+    var row=document.createElement("div");
+    row.className="vtog-row";
+    var parts=d.split("-");
+    var dt=new Date(parts[0],parts[1]-1,parts[2]);
+    var dn=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    var mn=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    var label=dn[dt.getDay()]+" "+parts[2]+" "+mn[dt.getMonth()]+" "+parts[0];
+    row.innerHTML='<div class="vtog-info"><div class="vtog-name">'+label+'</div></div><div class="delbtn" onclick="removeWatchDate('+i+')" style="width:30px;height:30px;background:rgba(255,82,82,0.1);border:1px solid rgba(255,82,82,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:#ff5252;">&#215;</div>';
+    list.appendChild(row);
+  });
+}
+function addWatchDate(){
+  var val=document.getElementById("watchDate").value;
+  if(!val){alert("Please pick a date.");return;}
+  var dates=[];
+  try{dates=JSON.parse(localStorage.getItem("wd")||"[]");}catch(e){}
+  if(!dates.includes(val))dates.push(val);
+  dates.sort();
+  localStorage.setItem("wd",JSON.stringify(dates));
+  document.getElementById("watchDate").value="";
+  renderWatchList(dates);
+  saveWatchDatesToGH(dates);
+}
+function removeWatchDate(i){
+  var dates=[];
+  try{dates=JSON.parse(localStorage.getItem("wd")||"[]");}catch(e){}
+  dates.splice(i,1);
+  localStorage.setItem("wd",JSON.stringify(dates));
+  renderWatchList(dates);
+  saveWatchDatesToGH(dates);
+}
+async function saveWatchDatesToGH(dates){
+  if(!gtok())return;
+  try{
+    await fetch("https://api.github.com/repos/"+grepo()+"/actions/variables/WATCH_DATES",{method:"PATCH",headers:{"Authorization":"Bearer "+gtok(),"Accept":"application/vnd.github.v3+json","Content-Type":"application/json"},body:JSON.stringify({name:"WATCH_DATES",value:JSON.stringify(dates)})});
+  }catch(e){console.log("Watch date save err: "+e.message);}
+}
 function togAlert(){
   var t=document.getElementById("alertToggle");
   t.classList.toggle("on");
@@ -607,7 +665,7 @@ function renderRes(data){
   });
   var tot=0;filtered.forEach(function(d){tot+=(d.slots||[]).length;});
   data=filtered;document.getElementById("sbar").style.display="flex";document.getElementById("snum").textContent=tot;document.getElementById("sat").innerHTML="Last checked<br>"+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});if(tot===0){c.innerHTML='<div class="empty"><div class="ei">&#128614;</div><div class="et">No courts available</div><p>All courts are booked. Try refreshing!</p></div>';return;}data.forEach(function(entry){var slots=entry.slots||[];if(!slots.length)return;var dv=document.createElement("div");dv.className="ddiv";dv.textContent=fmtDate(entry.date);c.appendChild(dv);slots.forEach(function(slot){var sc=document.createElement("div");sc.className="scard";sc.innerHTML='<div class="sdot"></div><div class="sinfo"><div class="stime">'+(slot.time||"")+'</div><div class="scourt">'+(slot.court||"")+'</div></div><div class="bbtn">BOOK</div>';sc.onclick=function(){window.open(bookUrl(),"_blank");};c.appendChild(sc);});});}
-window.addEventListener("load",function(){loadTheme();loadAll();document.getElementById("tok").value=localStorage.getItem("pt")||sessionStorage.getItem("pt")||"";document.getElementById("repo").value=localStorage.getItem("pr")||sessionStorage.getItem("pr")||"puffsdad/egp-monitor";loadAlertSettings();renderGrid();readResults();});
+window.addEventListener("load",function(){loadTheme();loadAll();document.getElementById("tok").value=localStorage.getItem("pt")||sessionStorage.getItem("pt")||"";document.getElementById("repo").value=localStorage.getItem("pr")||sessionStorage.getItem("pr")||"puffsdad/egp-monitor";loadAlertSettings();loadWatchDates();renderGrid();readResults();});
 </script>
 <div class="countdown-overlay" id="cdOverlay">
   <div class="countdown-box">
